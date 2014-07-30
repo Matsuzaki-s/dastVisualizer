@@ -1,0 +1,12 @@
+Class:BinarySearchTree, Node, BSTTest
+BinarySearchTree{
+	root:v
+}
+Node{
+	right:v>
+	left:<v
+}
+
+BSTTest{
+	BST:v
+}
