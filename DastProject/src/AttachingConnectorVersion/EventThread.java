@@ -75,7 +75,7 @@ public class EventThread extends Thread {
 
     private boolean draw = false;
     
-    private boolean step = false;
+    private boolean step = true;
     // Maps ThreadReference to ThreadTrace instances
     private Map traceMap = new HashMap();
 
