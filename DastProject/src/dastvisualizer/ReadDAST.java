@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class ReadFile extends StreamTokenizer {
+public class ReadDAST extends StreamTokenizer {
 	private final static char LCB = '{';
 	private final static char RCB = '}';
 	//private final static char COLON = ':';
@@ -19,7 +19,7 @@ public class ReadFile extends StreamTokenizer {
 	private List<ClassDefinition> classSet = new ArrayList<ClassDefinition>();
 	
 	@SuppressWarnings("deprecation")
-	public	ReadFile(InputStream in){
+	public	ReadDAST(InputStream in){
 		// TODO Auto-generated method stub
 		
 		super(in);

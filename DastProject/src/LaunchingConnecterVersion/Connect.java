@@ -10,7 +10,7 @@ import java.util.*;
 import com.sun.jdi.connect.*;
 import com.sun.jdi.*;
 
-import dastvisualizer.ReadFile;
+import dastvisualizer.ReadDAST;
 
 
 public class Connect {
@@ -29,7 +29,7 @@ public class Connect {
 	private String[] excludes = {"java.*", "javax.*", "sun.*", 
 	 "com.sun.*"};
 	private boolean watchFields = true;
-	private ReadFile rf;
+	private ReadDAST rf;
 	
 	public static void main(String args[]){
 		new Connect();
@@ -118,7 +118,7 @@ public class Connect {
 	//ˆÈ‰ºƒRƒsƒy
 	 void generateTrace() {
 		 try {
-			rf = new ReadFile(new FileInputStream("C:\\Users\\student\\Desktop\\prog\\BST\\BST.dust"));
+			rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\Desktop\\prog\\BST\\BST.dust"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import nd.com.sun.tools.example.debug.event.ModificationWatchpointEventSet;
+
 import com.sun.jdi.ClassType;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
@@ -16,7 +18,7 @@ public class ObjectManager {
 	private List<ObjectInfo> objectInfo = new ArrayList<ObjectInfo>();
 	private List<List<ObjectInfo>> objectInfoMemory = new ArrayList<List<ObjectInfo>>();
 	private List<ObjectInfo> drawTarget;
-	private ReadFile rf;
+	private ReadDAST rf;
 	private Visualize visualize;
 
 	/*public ObjectManager(List<ReferenceType> tar, ReadFile rf){
@@ -138,6 +140,27 @@ public class ObjectManager {
 			
 		}
 	}
+	
+	public void renew(ModificationWatchpointEventSet event){
+		ObjectReference tar = event.getObject();
+		ObjectInfo obInfo = isMadeObjectInfo(event.getObject());
+		if(obInfo != null){
+			
+			obInfo.changeField(event);
+			addObjectInfoMemory();
+		}else{
+			ClassDefinition cld = isDefinedClass((ClassType) tar.referenceType());
+			if(cld != null){
+				targetObject.add(tar);
+				objectInfo.add(new ObjectInfo(tar, (ClassType)tar.referenceType(), cld, this));
+				addObjectInfoMemory();
+			}
+			
+		}
+	}
+	
+	
+
 	
 	private ObjectInfo isMadeObjectInfo(ObjectReference tar){
 		for(Iterator<ObjectInfo> it = objectInfo.iterator(); it.hasNext();){

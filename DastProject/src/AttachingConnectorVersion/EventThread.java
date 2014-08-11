@@ -40,7 +40,7 @@ import com.sun.jdi.request.*;
 import com.sun.jdi.event.*;
 
 import dastvisualizer.ObjectManager;
-import dastvisualizer.ReadFile;
+import dastvisualizer.ReadDAST;
 
 import java.util.*;
 import java.io.BufferedReader;
@@ -65,7 +65,7 @@ public class EventThread extends Thread {
     
     private final ObjectManager objm;
     
-    private ReadFile rf;
+    private ReadDAST rf;
     private List<ReferenceType> TargetClass = new ArrayList<ReferenceType>();
 
     static String nextBaseIndent = ""; // Starting indent for next thread
@@ -79,7 +79,7 @@ public class EventThread extends Thread {
     // Maps ThreadReference to ThreadTrace instances
     private Map traceMap = new HashMap();
 
-    EventThread(VirtualMachine vm, String[] excludes, PrintWriter writer, ReadFile rf) {
+    EventThread(VirtualMachine vm, String[] excludes, PrintWriter writer, ReadDAST rf) {
         super("event-handler");
         this.vm = vm;
         this.excludes = excludes;

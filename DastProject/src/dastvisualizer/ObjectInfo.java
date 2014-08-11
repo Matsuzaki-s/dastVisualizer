@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import nd.com.sun.tools.example.debug.event.ModificationWatchpointEventSet;
+
 import com.sun.jdi.ClassObjectReference;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
@@ -113,6 +115,19 @@ public class ObjectInfo {
 		}
 	}
 	
+	public void changeField(ModificationWatchpointEventSet event) {
+		ObjectReference object = event.getObject();
+		Field field = event.getField();
+		Value value = event.getValueToBe();
+		
+		int direction = isAroundField(field); 
+		if(direction >= 0){
+			around[direction] = om.searchObjectInfo((ObjectReference)value);
+		}else{
+			setAnotherField(field.name(), value);
+		}
+	}
+
 	public void setAnotherField(String name, Value value){
 		if(value instanceof IntegerValue){
 			anotherField.put("int " + name, ((IntegerValue)value).value());
@@ -638,4 +653,6 @@ public class ObjectInfo {
 		return tar;
 		
 	}
+
+	
 }

@@ -20,11 +20,11 @@ import com.sun.jdi.connect.Connector.IntegerArgument;
 import com.sun.jdi.connect.Connector.StringArgument;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 
-import dastvisualizer.ReadFile;
+import dastvisualizer.ReadDAST;
 
 public class Connect {
 	private VirtualMachine vm;
-	private ReadFile rf;
+	private ReadDAST rf;
 	private Thread errThread = null;
 	private Thread outThread = null;
 	private int debugTraceMode = 0;
@@ -80,7 +80,7 @@ public class Connect {
 	
 	void generateTrace() {
 		 try {
-			rf = new ReadFile(new FileInputStream("TestTarget\\BST\\BST.dust"));
+			rf = new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dust"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
