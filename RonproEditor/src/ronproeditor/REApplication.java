@@ -59,7 +59,7 @@ import clib.view.dialogs.CErrorDialog;
 
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
-import dastvisualizer.ReadDAST;
+
 
 /*
  * Ronpro Editor Application
@@ -1003,14 +1003,21 @@ public class REApplication implements ICFwApplication {
 				writePresLog(PRCommandLog.SubType.DEBUG_CHANGEMODE, mode);
 			}
 		});
-		
+		/*
 		//追加///////////////////
 		ReadDAST readfile = dastSelect();
 		/////////////////////
+		 * 
+		 */
 		
 		
 		
-		deno = new GUI(readfile);
+		try {
+			deno = new GUI(new FileInputStream("TestTarget\\BST\\BST.dust"));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		deno.run(args);
 		deno.getFrame().addWindowFocusListener(new WindowFocusListener() {
@@ -1030,7 +1037,8 @@ public class REApplication implements ICFwApplication {
 		cmdint.executeCommand("run");
 	}
 
-	/*追加部分　DASTファイル選択*/////////////////////////////////////
+	//追加部分　DASTファイル選択*/////////////////////////////////////
+	/*
 	private ReadDAST dastSelect(){
 		try {
 			return new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dust"));
@@ -1040,7 +1048,7 @@ public class REApplication implements ICFwApplication {
 		}
 		return null;
 	}
-	//////////////////////////////////////////
+	*/
 	
 	// Helper
 	public boolean hasRunnableFile(File source) {

@@ -1,21 +1,16 @@
 package dastvisualizer;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import nd.com.sun.tools.example.debug.event.ModificationWatchpointEventSet;
 
-import com.sun.jdi.ClassObjectReference;
+
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
-import com.sun.jdi.IntegerType;
 import com.sun.jdi.IntegerValue;
 import com.sun.jdi.ObjectReference;
-import com.sun.jdi.PrimitiveValue;
-import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Value;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 
@@ -115,10 +110,7 @@ public class ObjectInfo {
 		}
 	}
 	
-	public void changeField(ModificationWatchpointEventSet event) {
-		ObjectReference object = event.getObject();
-		Field field = event.getField();
-		Value value = event.getValueToBe();
+	public void changeField(Field field, Value value) {
 		
 		int direction = isAroundField(field); 
 		if(direction >= 0){

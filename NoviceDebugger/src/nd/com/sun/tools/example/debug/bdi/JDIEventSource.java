@@ -34,6 +34,7 @@
 package nd.com.sun.tools.example.debug.bdi;
 
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 
@@ -52,11 +53,15 @@ import nd.com.sun.tools.example.debug.event.VMDisconnectEventSet;
 import nd.com.sun.tools.example.debug.event.VMStartEventSet;
 
 import com.sun.jdi.ClassType;
+import com.sun.jdi.Field;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.ModificationWatchpointEvent;
+import com.sun.jdi.request.EventRequest;
+import com.sun.jdi.request.EventRequestManager;
+import com.sun.jdi.request.ModificationWatchpointRequest;
 
 import dastvisualizer.ObjectManager;
 import dastvisualizer.ReadDAST;
@@ -73,6 +78,8 @@ class JDIEventSource extends Thread {
 
 	/*í«â¡ïîï™*/
 	private final ObjectManager objm;
+	private String[] excludes = {"java.*", "javax.*", "sun.*", 
+	 "com.sun.*"};
 	
 	/**
 	 * Create event source.
@@ -100,6 +107,7 @@ class JDIEventSource extends Thread {
 		do {
 			EventSet jdiEventSet = queue.remove();
 			es = AbstractEventSet.toSpecificEventSet(jdiEventSet);
+			
 			session.interrupted = es.suspendedAll();
 			dispatchEventSet(es);
 		} while(!(es instanceof VMDisconnectEventSet));
@@ -107,6 +115,7 @@ class JDIEventSource extends Thread {
 
 	//### Gross foul hackery!
 	private void dispatchEventSet(final AbstractEventSet es) {
+		System.out.println(es);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				boolean interrupted = es.suspendedAll();
@@ -115,8 +124,10 @@ class JDIEventSource extends Thread {
 				for (Iterator<JDIListener> it = session.runtime.jdiListeners.iterator(); 
 						it.hasNext(); ) {
 					JDIListener jl = (JDIListener)it.next();
+					System.out.println(jl.toString());
 					es.notify(jl);
 				}
+				System.out.println("---");
 				if (interrupted && !wantInterrupt) {
 					session.interrupted = false;
 					//### Catch here is a hack
@@ -150,17 +161,37 @@ class JDIEventSource extends Thread {
 	//### This is a Hack, deal with it
 	private class FirstListener implements JDIListener {
 
+		int CPcount = 0;
+		
 		public void accessWatchpoint(AccessWatchpointEventSet e) {
 			session.runtime.validateThreadInfo();
 			wantInterrupt = true;
 		}
 
 		public void classPrepare(ClassPrepareEventSet e)  {
+			System.out.println(CPcount +  " "  + e.getReferenceType().name());
+			CPcount++;
 			//í«â¡
-			objm.classPrepare((ClassType) e.getReferenceType());
-			//
+			if(objm.classPrepare(e.getReferenceType())){
+			EventRequestManager mgr = session.vm.eventRequestManager();
+			List fields = e.getReferenceType().visibleFields(); // visibeFields() Å® allFields()
+			for (Iterator it = fields.iterator(); it.hasNext();) {
+				Field field = (Field) it.next();
+				ModificationWatchpointRequest req = mgr
+						.createModificationWatchpointRequest(field);
+				for (int i = 0; i < excludes.length; ++i) {
+					req.addClassExclusionFilter(excludes[i]);
+				}
+				req.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+				req.enable();
+			}
+			fields = null;
+			
+			}
+			//////////////////////////
 			wantInterrupt = false;
 			runtime.resolve(e.getReferenceType());
+			
 		}
 
 		public void classUnload(ClassUnloadEventSet e)  {
@@ -177,7 +208,7 @@ class JDIEventSource extends Thread {
 		}
 
 		public void modificationWatchpoint(ModificationWatchpointEventSet e)  {
-			objm.renew(e);
+			objm.renew(e.getObject(), e.getField(), e.getValueToBe());
 	    	objm.setLink();
 	    	objm.draw();
 			session.runtime.validateThreadInfo();

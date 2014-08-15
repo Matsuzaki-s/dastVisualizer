@@ -59,8 +59,9 @@ public class ClassDefinition {
 			break;
 		case ">v":
 			direction = 7;
-		case "Array":
+		/*case "Array":
 			direction = 8;
+		*/
 			break;
 			default:
 				System.out.println("Error in ClassDifinition.numDirection");
@@ -69,9 +70,9 @@ public class ClassDefinition {
 		return direction;
 	}
 	
-	public void setArray(String fieldName){
-		setField(fieldName, "Array");
-	}
+	/*public void setArray(String fieldName, String direction){
+		setField(fieldName, direction);
+	}*/
 	
 	public String getName(){
 		return name;

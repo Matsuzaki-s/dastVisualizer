@@ -240,8 +240,8 @@ public class CommandTool extends JPanel {
 
 		public void modificationWatchpoint(ModificationWatchpointEventSet e) {
 			setThread(e);
-			for (EventIterator it = e.eventIterator(); it.hasNext(); ) {
-				//Event evt = it.nextEvent();
+			for (EventIterator it = e.eventIterator(); it.hasNext();) {
+				Event evt = it.nextEvent();
 				diagnostics.putString("Watchpoint hit: " + 
 						locationString(e));
 			}

@@ -108,14 +108,17 @@ public class ReadDAST extends StreamTokenizer {
 					while ((ret = nextToken()) != RCB) {
 						if(ret == TT_WORD){
 							String fieldName = sval;
-							Pattern p = Pattern.compile("\\[\\]$");
+							/*Pattern p = Pattern.compile("\\[\\]$");
 							Matcher m = p.matcher(fieldName);
 							if(m.find()){
-								classSet.get(tar).setArray(sval);
+								while((ret = nextToken()) != TT_WORD);
+								classSet.get(tar).setArray(fieldName, sval);
 							}else{
 								while((ret = nextToken()) != TT_WORD);
 								classSet.get(tar).setField(fieldName, sval);
-							}							
+							}*/	
+							while((ret = nextToken()) != TT_WORD);
+							classSet.get(tar).setField(fieldName, sval);
 						}
 					}
 				}

@@ -41,6 +41,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
 
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -119,11 +120,13 @@ public class GUI extends JPanel {
 	// private MonitorTool monitorTool;
 
 
-	public GUI(ReadDAST readfile) {
+	public GUI(){
 		
-		//’Ç‰Á/////
-		env.setReadFile(readfile);
-		///////
+	}
+	
+	public GUI(FileInputStream pass) {
+		
+		env.setReadFile(new ReadDAST(pass));
 		
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(5, 5, 5, 5));

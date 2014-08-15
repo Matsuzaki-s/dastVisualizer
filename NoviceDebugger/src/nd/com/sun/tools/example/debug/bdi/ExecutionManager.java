@@ -89,6 +89,9 @@ public class ExecutionManager {
 
 	private Session session;
 
+	private String[] excludes = {"java.*", "javax.*", "sun.*", 
+	 "com.sun.*"};
+	
 	/**
 	 * Get/set JDI trace mode.
 	 */
@@ -474,6 +477,9 @@ public class ExecutionManager {
 		// ### we continue executing the class. We could optimize if there
 		// ### were no deferred breakpoints outstanding for a particular class.
 		// ### Can we do this with JDI?
+		for (int i = 0; i < excludes.length; ++i) {
+			classPrepareRequest.addClassExclusionFilter(excludes[i]);
+		}
 		classPrepareRequest.setSuspendPolicy(EventRequest.SUSPEND_ALL);
 		classPrepareRequest.enable();
 		ClassUnloadRequest classUnloadRequest = em.createClassUnloadRequest();

@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -28,7 +30,6 @@ public class Visualize extends JFrame{
 	private JScrollPane mainPanel;
 
 	Visualize(List<ObjectInfo> cell){
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(1200, 700);
 		this.setTitle("ver14");
 		this.setBackground(Color.WHITE);

@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import nd.com.sun.tools.example.debug.event.ModificationWatchpointEventSet;
+
+
+
 
 import com.sun.jdi.ClassType;
+import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.Value;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 
 public class ObjectManager {	
-	private List<ClassType> preparedClass = new ArrayList<ClassType>();
+	private List<ReferenceType> preparedClass = new ArrayList<ReferenceType>();
 	private List<ClassDefinition> targetClass = new ArrayList<ClassDefinition>();
 	private List<ObjectReference> targetObject = new ArrayList<ObjectReference>();
 	private List<ObjectInfo> objectInfo = new ArrayList<ObjectInfo>();
@@ -107,13 +111,23 @@ public class ObjectManager {
 		}
 	}
 		
-	public void classPrepare(ClassType tar){
+	public boolean classPrepare(ClassType tar){
 		if(isDefinedClass(tar) != null){
 			preparedClass.add(tar);
+			return true;
 		}
+		return false;
 	}
 	
-	private ClassDefinition isDefinedClass(ClassType tar){
+	public boolean classPrepare(ReferenceType tar) {
+		if(isDefinedClass(tar) != null){
+			preparedClass.add(tar);
+			return true;
+		}
+		return false;
+	}
+	
+	private ClassDefinition isDefinedClass(ReferenceType tar){
 		for(Iterator<ClassDefinition> it = targetClass.iterator(); it.hasNext();){
 			ClassDefinition cld = ((ClassDefinition) it.next());
 			if(cld.getName().equals(tar.name())){
@@ -141,18 +155,17 @@ public class ObjectManager {
 		}
 	}
 	
-	public void renew(ModificationWatchpointEventSet event){
-		ObjectReference tar = event.getObject();
-		ObjectInfo obInfo = isMadeObjectInfo(event.getObject());
+	public void renew(ObjectReference object, Field field, Value value){
+		ObjectInfo obInfo = isMadeObjectInfo(object);
 		if(obInfo != null){
 			
-			obInfo.changeField(event);
+			obInfo.changeField(field, value);
 			addObjectInfoMemory();
 		}else{
-			ClassDefinition cld = isDefinedClass((ClassType) tar.referenceType());
+			ClassDefinition cld = isDefinedClass((ClassType) object.referenceType());
 			if(cld != null){
-				targetObject.add(tar);
-				objectInfo.add(new ObjectInfo(tar, (ClassType)tar.referenceType(), cld, this));
+				targetObject.add(object);
+				objectInfo.add(new ObjectInfo(object, (ClassType)object.referenceType(), cld, this));
 				addObjectInfoMemory();
 			}
 			
@@ -180,5 +193,7 @@ public class ObjectManager {
 		}
 		objectInfoMemory.add(copy);
 	}
+
+	
 
 }
