@@ -1003,12 +1003,7 @@ public class REApplication implements ICFwApplication {
 				writePresLog(PRCommandLog.SubType.DEBUG_CHANGEMODE, mode);
 			}
 		});
-		/*
-		//’Ç‰Á///////////////////
-		ReadDAST readfile = dastSelect();
-		/////////////////////
-		 * 
-		 */
+
 		
 		
 		

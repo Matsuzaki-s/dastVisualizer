@@ -188,7 +188,7 @@ class JDIEventSource extends Thread {
 			fields = null;
 			
 			}
-			//////////////////////////
+			/////////////////////////
 			wantInterrupt = false;
 			runtime.resolve(e.getReferenceType());
 			
