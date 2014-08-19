@@ -154,6 +154,8 @@ public class EventThread extends Thread {
 			cpr.setSuspendPolicy(EventRequest.SUSPEND_ALL);
 			cpr.enable();
 		}
+		
+		
 
 		// ’Ç‰Á
 		// ModificationWatchpointRequest mwr =
@@ -319,6 +321,8 @@ public class EventThread extends Thread {
 		} else if (event instanceof VMDisconnectEvent) {
 			writer.println("VMDisconnect");
 			vmDisconnectEvent((VMDisconnectEvent) event);
+		}else if(event instanceof AccessWatchpointEvent){
+			writer.println("AccessWatchpointEvent");
 		} else {
 			throw new Error("Unexpected event type");
 		}
@@ -371,6 +375,26 @@ public class EventThread extends Thread {
 
 	// Forward event for thread specific processing
 	private void fieldWatchEvent(ModificationWatchpointEvent event) {
+		/*Value value = event.valueToBe();
+		Type type = null;
+		if(value != null){
+			type = value.type();
+		}
+		if(type != null && type instanceof ArrayType){
+			EventRequestManager mgr = vm.eventRequestManager();
+			for(Iterator it = ((ArrayType)type).allFields().iterator(); it.hasNext();){
+				Field field = (Field)it.next();
+				System.out.println(field.name());
+				ModificationWatchpointRequest req = mgr
+						.createModificationWatchpointRequest(field);
+				for (int i = 0; i < excludes.length; ++i) {
+					req.addClassExclusionFilter(excludes[i]);
+				}
+				req.setSuspendPolicy(EventRequest.SUSPEND_NONE);
+				req.enable();
+			}		
+		}*/
+		
 		objm.renew(event);
 		objm.setLink();
 		objm.draw();
@@ -388,7 +412,6 @@ public class EventThread extends Thread {
 	 * A new class has been loaded. Set watchpoints on each of its fields
 	 */
 	private void classPrepareEvent(ClassPrepareEvent event) {
-
 		objm.classPrepare((ClassType) event.referenceType());
 		EventRequestManager mgr = vm.eventRequestManager();
 		List fields = event.referenceType().visibleFields(); // visibeFields() ¨ allFields()

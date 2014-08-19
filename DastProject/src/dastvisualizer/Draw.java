@@ -36,6 +36,7 @@ public class Draw extends JPanel {
 		
 		
 		super();
+		System.out.println();
 		setLayout(null);
 		setBackground(Color.WHITE);
 				
@@ -52,6 +53,8 @@ public class Draw extends JPanel {
 		
 		for(Iterator<ObjectInfo> it = tar.iterator(); it.hasNext();){
 			ObjectInfo oin = (ObjectInfo)it.next();
+			//System.out.println(oin.object.toString());
+			//System.out.println(oin.isLinked() + " "+ oin.hasLink());
 			if(oin.isLinked() == true || oin.hasLink() == true){
 				cellpanel.put(oin ,new CellPanel(oin));
 				
@@ -72,9 +75,9 @@ public class Draw extends JPanel {
 			try{
 			if(panel != null ){
 				if(panel.getCellLength() > CellLength /2){
-					panel.setBounds(object.getPx() * (CellWidth+ 20) + 20  , object.getPy() * (CellLength+ 20) + 20, panel.getMaximumSize().width,panel.getMaximumSize().height );
+					panel.setBounds(object.getPx() * (CellWidth+ 20) + 20  , object.getPy() * (CellLength+ 40) + 20, panel.getMaximumSize().width,panel.getMaximumSize().height );
 				}else{
-					panel.setBounds(object.getPx() * (CellWidth+ 20) + 20  , object.getPy() * (CellLength+ 20) +(CellLength /2) - panel.getCellLength()/2, panel.getMaximumSize().width,panel.getMaximumSize().height );
+					panel.setBounds(object.getPx() * (CellWidth+ 20) + 20  , object.getPy() * (CellLength+ 40) +(CellLength /2) - panel.getCellLength()/2, panel.getMaximumSize().width,panel.getMaximumSize().height );
 				}
 				add(panel);
 			}
@@ -100,7 +103,7 @@ public class Draw extends JPanel {
 		CellPanel cell = ent.getValue();
 		ObjectInfo around[] = oin.getAround();
 		CellPanel tar;
-		if(oin.isArray() == false){
+		if(!(oin instanceof ArrayInfo)){
 		for(int i = 0;i <= 7;i++ ){ 
 			if(around[i] != null && ((tar = searchAroundPanel(around[i]) )!= null)){
 				
@@ -182,17 +185,17 @@ public class Draw extends JPanel {
 				}
 			}
 		}
-		/*}else{
-			MyArray array = (MyArray)(oin);
-			ObjectInfo[] refer = array.getRefer();
-			for(int i = 0; i < refer.length; i++){
-				if(refer[i] != null && (tar = searchAroundPanel(refer[i]) )!= null){
+		}else{
+			ArrayInfo array = (ArrayInfo)(oin);
+			ObjectInfo[] arrayValue = array.getArrayValue();
+			for(int i = 0; i < arrayValue.length; i++){
+				if(arrayValue[i] != null && (tar = searchAroundPanel(arrayValue[i]) )!= null){
 					if(array.getDirection() >= 5 && array.getDirection() <= 7){
-						drawArrow(g, cell.getX() +(cell.getWidth() / refer.length /2) +(cell.getWidth() / refer.length * i), cell.getY() + cell.getCellLength(), tar.getX() + tar.getCellWidth() /2, tar.getY(), 5);
+						drawArrow(g, cell.getX() +(cell.getWidth() / arrayValue.length /2) +(cell.getWidth() / arrayValue.length * i), cell.getY() + cell.getCellLength(), tar.getX() + tar.getCellWidth() /2, tar.getY(), 5);
 					}else if(array.getDirection() >= 0 && array.getDirection() <= 2){
-						drawArrow(g, cell.getX() +(cell.getWidth() / refer.length /2) +(cell.getWidth() / refer.length * i), cell.getY(), tar.getX() + tar.getCellWidth() /2, tar.getY() + tar.getCellLength(), 5);
+						drawArrow(g, cell.getX() +(cell.getWidth() / arrayValue.length /2) +(cell.getWidth() / arrayValue.length * i), cell.getY(), tar.getX() + tar.getCellWidth() /2, tar.getY() + tar.getCellLength(), 5);
 					}else if(array.getDirection() == 4){
-						if(oin.getPx() < refer[i].getPx()){
+						if(oin.getPx() < arrayValue[i].getPx()){
 							drawArrow(g, cell.getX() +cell.getWidth(), cell.getY() + 27 + 18 *i , tar.getX(), tar.getY() + tar.getCellLength()/2, 5);
 						}else{
 							g.drawLine(cell.getX() +cell.getWidth(), cell.getY() + 27 + 18 *i , cell.getX() +cell.getWidth() + 10, cell.getY() + 27 + 18 *i );
@@ -205,7 +208,7 @@ public class Draw extends JPanel {
 					}
 				}
 					
-			}*/
+			}
 		}
 
 	}

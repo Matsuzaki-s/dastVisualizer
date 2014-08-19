@@ -8,10 +8,19 @@ import java.util.List;
 
 
 
+
+
+
+
+
+import com.sun.jdi.ArrayReference;
+import com.sun.jdi.ArrayType;
+import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
+import com.sun.jdi.Type;
 import com.sun.jdi.Value;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 
@@ -21,6 +30,7 @@ public class ObjectManager {
 	private List<ObjectReference> targetObject = new ArrayList<ObjectReference>();
 	private List<ObjectInfo> objectInfo = new ArrayList<ObjectInfo>();
 	private List<List<ObjectInfo>> objectInfoMemory = new ArrayList<List<ObjectInfo>>();
+	private List<ArrayInfo> arrayInfo = new ArrayList<ArrayInfo>();
 	private List<ObjectInfo> drawTarget;
 	private ReadDAST rf;
 	private Visualize visualize;
@@ -64,6 +74,7 @@ public class ObjectManager {
 	}*/
 	
 	public void setLink(){
+		if(objectInfoMemory.size() > 0){
 		for(Iterator<ObjectInfo> it = (objectInfoMemory.get(objectInfoMemory.size() - 1)).iterator(); it.hasNext();){
 			ObjectInfo oinfo = (ObjectInfo)it.next();
 			try {
@@ -75,6 +86,7 @@ public class ObjectManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
 		}
 	}
 	
@@ -89,13 +101,20 @@ public class ObjectManager {
 	}
 	
 	public void draw(){
-		List<ObjectInfo> tar = objectInfoMemory.get(objectInfoMemory.size() - 1); 
+		if(objectInfoMemory.size() > 0){
+		List<ObjectInfo> tar = objectInfoMemory.get(objectInfoMemory.size() - 1);
+
+		System.out.println();
+		
 		if(visualize == null){
 			set(tar);
+			
 			visualize = new Visualize(tar);
 		}else{	
 			set(tar);
 			visualize.reDraw(tar);
+		}
+		System.out.println();
 		}
 	}
 	
@@ -106,6 +125,39 @@ public class ObjectManager {
 				oin.calculateSize();
 				oin.setPosion();
 				
+				for(int i = 0; i < oin.getWidth() || i < oin.getLength(); i++){
+					boolean slideLeft = true;
+					boolean slideUp = true;
+					for(Iterator<ObjectInfo> iit = tar.iterator(); iit.hasNext();){
+						ObjectInfo oi = iit.next();
+						if(oi.getPx() == i){
+							slideLeft = false;
+						}
+						if(oi.getPy() == i){
+							slideUp = false;
+						}
+						if(slideUp == false && slideLeft == false){
+							break;
+						}
+					}
+					if(slideLeft && i <= oin.getWidth()){
+						for(Iterator<ObjectInfo> iit = tar.iterator(); iit.hasNext();){
+							ObjectInfo oi = iit.next();
+							if(oi.getPx() > i){
+								oi.slideLeft();
+							}
+						}
+					}
+					if(slideUp && i <= oin.getLength()){
+						for(Iterator<ObjectInfo> iit = tar.iterator(); iit.hasNext();){
+							ObjectInfo oi = iit.next();
+							if(oi.getPy() > i){
+								oi.slideUp();
+							}
+						}
+					}
+					
+				}
 				break;
 			}
 		}
@@ -131,8 +183,10 @@ public class ObjectManager {
 		for(Iterator<ClassDefinition> it = targetClass.iterator(); it.hasNext();){
 			ClassDefinition cld = ((ClassDefinition) it.next());
 			if(cld.getName().equals(tar.name())){
+				//System.out.println(cld.getName() + " " + tar.name());
 				return cld;
 			}
+			//System.out.println(cld.getName() + " " + tar.name());
 		}
 		return null;
 	}
@@ -140,45 +194,95 @@ public class ObjectManager {
 	public void renew(ModificationWatchpointEvent event){
 		ObjectReference tar = event.object();
 		ObjectInfo obInfo = isMadeObjectInfo(event.object());
+		Value value = event.valueToBe();
+		Type type = null;
+		if(value != null){
+			type = value.type();
+
+		}
+		
 		if(obInfo != null){
-			
+			if(type != null && type instanceof ArrayType){
+				Field field = event.field();
+				addArray(tar, field, value);
+				obInfo.Link();
+			}
 			obInfo.changeField(event);
+			obInfo.setField();
 			addObjectInfoMemory();
 		}else{
-			ClassDefinition cld = isDefinedClass((ClassType) tar.referenceType());
+			ClassDefinition cld = isDefinedClass((ReferenceType) tar.referenceType());
 			if(cld != null){
 				targetObject.add(tar);
-				objectInfo.add(new ObjectInfo(tar, (ClassType)tar.referenceType(), cld, this));
+				ObjectInfo object = new ObjectInfo(tar, (ReferenceType)tar.referenceType(), cld, this);
+				object.setField();
+				objectInfo.add(object);
 				addObjectInfoMemory();
+				if(type != null && type instanceof ArrayType){
+					Field field = event.field();
+					addArray(tar, field, value);
+					object.Link();
+					addObjectInfoMemory();
+				}
+				//arrayCheck();
 			}
 			
 		}
+		
 	}
+	
+	public void addArray(ObjectReference from,Field field, Value value){
+		if(searchObjectInfo((ObjectReference)value) == null){
+			ClassDefinition cld = isDefinedClass((ClassType) from.referenceType());
+			int directed = cld.getDirectionbyName(field.name());
+			ArrayInfo array = new ArrayInfo((ObjectReference)value, value.type(), null, this, directed, field.name());
+			objectInfo.add(array);
+			arrayInfo.add(array);
+		}
+	}
+	
+	/*public void arrayCheck(){
+		for(Iterator<ArrayInfo> it = arrayInfo.iterator(); it.hasNext();){
+			ArrayInfo ar = (ArrayInfo)it.next();
+			
+		}
+	}*/
 	
 	public void renew(ObjectReference object, Field field, Value value){
 		ObjectInfo obInfo = isMadeObjectInfo(object);
-		if(obInfo != null){
-			
+		Type type = null;
+		type = value.type();
+		if(obInfo != null){			
+			if(type != null && type instanceof ArrayType){
+				addArray(object, field, value);
+			}
 			obInfo.changeField(field, value);
+			obInfo.setField();
 			addObjectInfoMemory();
 		}else{
 			ClassDefinition cld = isDefinedClass((ClassType) object.referenceType());
 			if(cld != null){
 				targetObject.add(object);
-				objectInfo.add(new ObjectInfo(object, (ClassType)object.referenceType(), cld, this));
+				ObjectInfo obj = new ObjectInfo(object, (ClassType)object.referenceType(), cld, this);
+				obj.setField();
+				objectInfo.add(obj);
 				addObjectInfoMemory();
+				if(type != null && type instanceof ArrayType){
+					addArray(object, field, value);
+					obj.Link();
+					addObjectInfoMemory();
+				}
 			}
 			
 		}
 	}
 	
-	
 
 	
-	private ObjectInfo isMadeObjectInfo(ObjectReference tar){
+	ObjectInfo isMadeObjectInfo(ObjectReference tar){
 		for(Iterator<ObjectInfo> it = objectInfo.iterator(); it.hasNext();){
 			ObjectInfo obInfo = (ObjectInfo)it.next();
-			if(obInfo.getobject() == tar){
+			if(obInfo.getobject().equals(tar)){
 				return obInfo;
 			}
 		}
@@ -192,6 +296,15 @@ public class ObjectManager {
 			copy.add(tar.deepCopy());
 		}
 		objectInfoMemory.add(copy);
+		for(Iterator<ObjectInfo> it = copy.iterator(); it.hasNext();){
+			ObjectInfo tar = it.next();
+			try {
+				tar.setLink();
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	

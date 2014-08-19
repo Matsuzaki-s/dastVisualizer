@@ -1,8 +1,8 @@
-Class:HashC, Cell, MyKey 
+Class:HashC, HashC$Cell, MyKey 
 HashC{
 	table[]:v
 }
-Cell{
+HashC$Cell{
 	key:>
 	next:v
 }

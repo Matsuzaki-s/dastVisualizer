@@ -50,9 +50,9 @@ public class CellPanel extends JPanel {
 			if (!(cell.isArray())) {
 				makeObjectCell(cell);
 				length = cp_num;
-			} /*else if(((MyArray)cell).isPrimitive() == false){
-				makeArrayCell((MyArray) cell);
-			}else{
+			} else if(((ArrayInfo)cell).isPrimitive() == false){
+				makeArrayCell((ArrayInfo) cell);
+			}/*else{
 				makePrimitiveArray((MyPrimitiveArray) cell);
 			}*/
 
@@ -117,14 +117,14 @@ public class CellPanel extends JPanel {
 						cp.add(new CellParts(str, Color.ORANGE));
 						cp_num++;
 						}
-					/*} else if(cell.getAround()[i] != null && cell.getAround()[i].isArray() == true){
-						str = cell.getAround()[i].getobject().getClass()
-								.getSimpleName()
+					} else if(cell.getAround()[i] != null && cell.getAround()[i].isArray() == true){
+						str = cell.getAroundFieldName()[i]
 								+ " "
-								+ ((MyArray) (cell.getAround()[i])).getName();
-						cp[cp_num] = new CellParts(str);
-						cp[cp_num].setBackground(Color.ORANGE);
-						cp_num++;*/
+								+ cell.getAround()[i].getobject().referenceType().name();
+								//+ ((ArrayInfo) (cell.getAround()[i])).getIndex();
+						cp.add(new CellParts(str, Color.ORANGE));
+						
+						cp_num++;
 					} else {
 
 						str = cell.getAroundFieldName()[i] + " " + "null";
@@ -146,14 +146,14 @@ public class CellPanel extends JPanel {
 
 	}
 
-	/*private void makeArrayCell(MyArray cell) {
-		String str = cell.getName();
-		cp[cp_num] = new CellParts(str);
-		cp[cp_num].setBackground(Color.YELLOW);
+	private void makeArrayCell(ArrayInfo cell) {
+		String str = cell.getArray().referenceType().name();
+		cp.add(new CellParts(str));
+		cp.get(cp_num).setBackground(Color.YELLOW);
 		cp_num++;
 
-		CellParts[] idl = new CellParts[cell.array.length];
-		CellParts[] ll = new CellParts[cell.array.length];
+		CellParts[] idl = new CellParts[cell.getSize()];
+		CellParts[] ll = new CellParts[cell.getSize()];
 
 		JPanel IDL = new JPanel();
 		JPanel LL = new JPanel();
@@ -167,7 +167,7 @@ public class CellPanel extends JPanel {
 		}
 		IDL.setOpaque(true);
 		IDL.setBackground(Color.WHITE);
-		for (int i = 0; i < cell.array.length; i++) {
+		for (int i = 0; i < cell.getSize(); i++) {
 			idl[i] = new CellParts(Integer.toString(i));
 			idl[i].setBackground(Color.ORANGE);
 		}
@@ -176,14 +176,14 @@ public class CellPanel extends JPanel {
 
 		LL.setOpaque(true);
 		LL.setBackground(Color.WHITE);
-		for (int i = 0; i < cell.array.length; i++) {
-			if (cell.array[i] != null) {
-				if (cell.refer[i] != null) {
-					String str2 = cell.array[i].getClass().getSimpleName()
-							+ ":" + (cell.refer[i].index + 1);
+		for (int i = 0; i < cell.getSize(); i++) {
+			if (cell.getArray().getValue(i) != null) {
+				if (cell.getArrayValue(i) != null) {
+					String str2 = cell.getArray().getValue(i).type().name()
+							+ ":" + (cell.getArrayValue(i).index);
 					ll[i] = new CellParts(str2);
 				} else {
-					String str2 = cell.array[i].toString();
+					String str2 = "null";
 					ll[i] = new CellParts(str2);
 
 				}
@@ -222,27 +222,27 @@ public class CellPanel extends JPanel {
 			add(IDL);
 			add(LL);
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(maxDim);
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(maxDim);
+				add(cp.get(i));
 			}
 			length = 3;
 
 		} else if (cell.getDirection() >= 6 && cell.getDirection() <= 7) {
 
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(maxDim);
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(maxDim);
+				add(cp.get(i));
 			}
 			add(IDL);
 			add(LL);
 			length = 3;
 		} else {
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(maxDim);
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(maxDim);
+				add(cp.get(i));
 			}
 
 			JPanel subPanel = new JPanel();
@@ -253,20 +253,20 @@ public class CellPanel extends JPanel {
 			subPanel.setVisible(true);
 			add(subPanel);
 
-			cp[0].setAlignmentX(0.5f);
-			cp[0].setMaximumSize(new Dimension(IDL.getMaximumSize().width
+			cp.get(0).setAlignmentX(0.5f);
+			cp.get(0).setMaximumSize(new Dimension(IDL.getMaximumSize().width
 					+ LL.getMaximumSize().width,
-					cp[0].getPreferredSize().height));
-			subPanel.setMaximumSize(new Dimension(80, 18*(cell.array.length+1)));
-			this.setMaximumSize(new Dimension(80, 18*(cell.array.length+1)+2));
-			this.setPreferredSize(new Dimension(80, 18*(cell.array.length+1)+2));
+					cp.get(0).getPreferredSize().height));
+			subPanel.setMaximumSize(new Dimension(80, 18*(cell.getSize()+1)));
+			this.setMaximumSize(new Dimension(80, 18*(cell.getSize()+1)+2));
+			this.setPreferredSize(new Dimension(80, 18*(cell.getSize()+1)+2));
 			
-			length = cell.array.length;
+			length = cell.getSize();
 
 			
 		}
 
-	}*/
+	}
 	
 	/*private void makePrimitiveArray(MyPrimitiveArray cell){
 		String str = cell.getName();

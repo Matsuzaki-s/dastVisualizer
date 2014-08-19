@@ -7,10 +7,19 @@ import java.util.Map;
 
 
 
+
+
+
+import java.util.Map.Entry;
+
+import com.sun.jdi.ArrayType;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
 import com.sun.jdi.IntegerValue;
 import com.sun.jdi.ObjectReference;
+import com.sun.jdi.ReferenceType;
+import com.sun.jdi.StringReference;
+import com.sun.jdi.Type;
 import com.sun.jdi.Value;
 import com.sun.jdi.event.ModificationWatchpointEvent;
 
@@ -29,20 +38,22 @@ public class ObjectInfo {
 	static final int down_cent_width = 9;
 	static final int down_right_width = 10;
 	
-	private ObjectReference object;
-	private ClassType  type;
+	protected ObjectReference object;
+	protected boolean isPrimitive = false;
+	protected ReferenceType  type;
 	private ClassDefinition def;
-	private int index;
+	protected int index;
 	//private int num_linked = 0;
 	//private int num_array = 0;
 	
-	private boolean set = false;
-	private boolean calculated = false;
+	protected boolean set = false;
+	protected boolean calculated = false;
 	private boolean linked = false;
 	private boolean link = false;
 	
 	private ObjectInfo[] around = new ObjectInfo[8];
 	
+	public boolean copy;
 	
 	//MyArray[] aroundArray = new MyArray[8]; 
 	private int with = -1;
@@ -51,27 +62,31 @@ public class ObjectInfo {
 	private int around_size[]  = { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private int width = 0;
 	private int length = 0;
-	private int ownLength = 1;
+	protected int ownLength = 1;
 	private int up_half = 0;
 	private int bottom_half = 0;
 	private int left_half= 0;
 	private int right_half = 0;
  	
-	private int px;
-	private int py;
+	protected int px;
+	protected int py;
 
 	//’Ç‰Á•ª
-	private ObjectManager om;
+	protected ObjectManager om;
+	private int i;
+	private String primitiveType;
 	
-	
-	ObjectInfo(ObjectReference tar,ClassType type, ClassDefinition def, ObjectManager om){
+	ObjectInfo(ObjectReference tar,Type type, ClassDefinition def, ObjectManager om){
 		object = tar;
 		this.om = om;
-		this.type = type;
+		this.type = (ReferenceType)type;
 		this.def = def;
+		if(def != null){
 		def.addObject();
 		index = def.getNumObject();
-		setField();
+		}
+		this.copy = false;
+		
 	}
 	
 	ObjectInfo(ObjectInfo source){
@@ -79,16 +94,35 @@ public class ObjectInfo {
 		this.om = source.om;
 		this.type = source.type;
 		this.def = source.def;
+		this.link = source.hasLink();
+		this.linked = source.isLinked();
 		index = source.index;
-		setField();
+		this.copy = true;
+		this.aroundFieldName = source.aroundFieldName;
+		this.anotherField = source.anotherField;
+
+		
 	}
 	
-	private void setField(){
+	ObjectInfo(Value v){
+		isPrimitive = true;
+		if(v instanceof IntegerValue){
+			i = ((IntegerValue)v).value();
+			primitiveType = "int";
+		}
+		
+	}
+	
+	public void setField(){
 		Map<String, Integer> fieldDirection = def.getFields();
 		List<Field> fields = type.fields();
 		for(Iterator<Field> it = fields.iterator(); it.hasNext();){
+			
 			Field tar = (Field)it.next();
 			Integer direction = fieldDirection.get(tar.name());
+			if(direction == null){
+				direction = fieldDirection.get(tar.name() + "[]");
+			}
 			if(direction != null && direction <= 7){
 				aroundFieldName[direction] = tar.name();
 			}else{
@@ -101,13 +135,18 @@ public class ObjectInfo {
 		ObjectReference object = event.object();
 		Field field = event.field();
 		Value value = event.valueToBe();
-		
-		int direction = isAroundField(field); 
-		if(direction >= 0){
-			around[direction] = om.searchObjectInfo((ObjectReference)value);
-		}else{
-			setAnotherField(field.name(), value);
+		Type type = null;
+		if(value != null){
+			type = value.type();
 		}
+			int direction = isAroundField(field);
+			if (direction >= 0) {
+				around[direction] = om.searchObjectInfo((ObjectReference) value);
+			} else {
+				setAnotherField(field.name(), value);
+			}
+			
+		
 	}
 	
 	public void changeField(Field field, Value value) {
@@ -123,6 +162,8 @@ public class ObjectInfo {
 	public void setAnotherField(String name, Value value){
 		if(value instanceof IntegerValue){
 			anotherField.put("int " + name, ((IntegerValue)value).value());
+		}else if(value instanceof StringReference){
+			anotherField.put("String " + name, value);
 		}else if(value instanceof ObjectReference){
 			if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
 				anotherField.put("Integer " + name,  (ObjectReference)value);
@@ -136,6 +177,11 @@ public class ObjectInfo {
 				return i;
 			}
 		}
+		for(int i = 0; i <= 7; i++){
+			if(aroundFieldName[i] != null && aroundFieldName[i].equals(field.name() + "[]")){
+				return i;
+			}
+		}
 		return -1;
 	}
 	
@@ -143,17 +189,26 @@ public class ObjectInfo {
 		List<Field> fields = object.referenceType().fields();
 		Map<String, Integer> fieldDirection = def.getFields();
 		
+		/*for(Iterator it = fieldDirection.entrySet().iterator(); it.hasNext();){
+			Map.Entry<String, Integer> entry = (Entry<String, Integer>) it.next();
+			System.out.println(entry.getKey() + " " + entry.getValue());
+		}*/
+		
 		for(Iterator<Field> it = fields.iterator(); it.hasNext(); ){
 			Field field = (Field)it.next();
 			Integer direction = fieldDirection.get(field.name());
+			if(direction == null){
+				 direction = fieldDirection.get(field.name() + "[]");
+			}
 			if(direction != null && object.getValue(field) != null){
-				if(around[direction] == null){
+				//if(around[direction] == null){
 					around[direction] = om.searchObjectInfo((ObjectReference)object.getValue(field));
 					if(around[direction] != null){
 						around[direction].Linked();
+						//System.out.println(aroundFieldName[direction] + " " + around[direction].object.referenceType());
 						this.Link();
 					}
-				}
+				//}
 			}
 		}
 	}
@@ -207,7 +262,7 @@ public class ObjectInfo {
 		
 	*/
 	
-	public void reset(){
+	/*public void reset(){
 		set = false;
 		calculated = false;
 		linked = false;
@@ -217,11 +272,11 @@ public class ObjectInfo {
 		
 		//resetAround();
 		
-	}
+	}*/
 	
 	public void calculateSize(){
 		calculated = true;
-		ownLength += anotherField.size();
+		//ownLength += anotherField.size();
 		around_size[cent_length] = ownLength; 
 		for(int i = 5; i <= 7; i++){
 			if(around[i] != null && around[i].calculated == false) {
@@ -310,6 +365,7 @@ public class ObjectInfo {
 		right_half = right + cent_right;
 		
 		length = around_size[up_length] + around_size[cent_length] + around_size[down_length] ;
+
 		
 		int cent_up = 0;
 		int cent_bottom = 0;
@@ -327,6 +383,8 @@ public class ObjectInfo {
 		}
 		up_half = around_size[up_length] + cent_up;
 		bottom_half = around_size[down_length] + cent_bottom;
+		
+
 }
 	
 	void setPosion(){
@@ -361,10 +419,11 @@ public class ObjectInfo {
 		
 		//ReadFile.setMap(this);
 		}
-		System.out.println(def.getName() + index + ":(" + px + "," + py + ") ");
+		System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
+		System.out.println();
 		
 		if(around[5] != null){
 			int cw = 0;

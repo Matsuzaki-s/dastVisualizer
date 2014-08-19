@@ -1008,7 +1008,8 @@ public class REApplication implements ICFwApplication {
 		
 		
 		try {
-			deno = new GUI(new FileInputStream("TestTarget\\BST\\BST.dust"));
+			//deno = new GUI(new FileInputStream("TestTarget\\BST\\BST.dust"));
+			deno = new GUI(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

@@ -81,6 +81,7 @@ public class Connect {
 	void generateTrace() {
 		 try {
 			rf = new ReadDAST(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
+			//rf = new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dast"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

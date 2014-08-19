@@ -30,6 +30,7 @@ public class ReadDAST extends StreamTokenizer {
 			wordChars('<', '>');
 			wordChars('^', '^');
 			wordChars('[', ']');
+			wordChars('$','$');
 			eolIsSignificant(true);
 
 			while ((ret = nextToken()) != TT_EOF) {
