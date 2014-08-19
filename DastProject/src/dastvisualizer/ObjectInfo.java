@@ -94,8 +94,6 @@ public class ObjectInfo {
 		this.om = source.om;
 		this.type = source.type;
 		this.def = source.def;
-		this.link = source.hasLink();
-		this.linked = source.isLinked();
 		index = source.index;
 		this.copy = true;
 		this.aroundFieldName = source.aroundFieldName;

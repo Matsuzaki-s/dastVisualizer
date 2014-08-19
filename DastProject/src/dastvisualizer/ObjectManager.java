@@ -161,6 +161,20 @@ public class ObjectManager {
 				break;
 			}
 		}
+		boolean sp = false;
+		List<ObjectInfo> remove = new ArrayList<ObjectInfo>(); 
+		for(Iterator<ObjectInfo> it = tar.iterator(); it.hasNext();){
+			ObjectInfo oin = it.next();
+			if(sp == false && oin.isLinked() == false && oin.hasLink() == true){
+				sp = true;
+			}else if(sp == true && oin.isLinked() == false && oin.hasLink() == true){
+				remove.add(oin);
+			}
+		}
+		
+		for(Iterator<ObjectInfo> it = remove.iterator();it.hasNext();){
+			tar.remove(it.next());
+		}
 	}
 		
 	public boolean classPrepare(ClassType tar){
