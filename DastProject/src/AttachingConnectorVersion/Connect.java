@@ -80,8 +80,10 @@ public class Connect {
 	
 	void generateTrace() {
 		 try {
-			rf = new ReadDAST(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
+			//rf = new ReadDAST(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
 			//rf = new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dast"));
+			//rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\git\\DENOwithDastVisualizer\\RonproEditor\\testbase\\MyProjects\\BTree\\DASTFile"));
+			 rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\Desktop\\Œ¤‹†Žº\\B4ƒ[ƒ~\\‘²‹ÆŒ¤‹†\\SA\\TestTarget\\src\\ArrayTest\\DASTFile"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -78,9 +78,15 @@ public class CellPanel extends JPanel {
 			Map<String, Object> field = cell.getAnotherField();
 			for (Iterator<Entry<String, Object>> it = field.entrySet().iterator(); it.hasNext();) {
 				Entry<String, Object> target = it.next();
+				if(target.getKey().matches(".*" + "Integer" + ".*")){
+					System.out.println(((ObjectReference) target.getValue()).referenceType());
+					str = target.getKey() + ":" + ((Integer)(target.getValue())).intValue();
+				}else{
+					
 				str = target.getKey() + ":" + target.getValue(); 
 				cp.add(new CellParts(str));
 				cp_num++;
+				}
 	
 				/*if (f.get(i).type() instanceof PrimitiveType) {
 					str = f.get(i).typeName() + " " + f.get(i).name()

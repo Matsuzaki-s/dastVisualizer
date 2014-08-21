@@ -46,10 +46,20 @@ public class ArrayInfo extends ObjectInfo{
 		super(tar, type, def, om);
 		array = (ArrayReference)(this.object);
 		this.directed = directed;
-		arrayValue = new ObjectInfo[size];
 		size = ((ArrayReference) tar).length();
+		arrayValue = new ObjectInfo[size];
 		this.fieldName = fieldName;
 		this.type = type;
+		try {
+			if(((ArrayType)type).componentType() instanceof PrimitiveType){
+				this.isPrimitive = true;
+			}else{
+				this.isPrimitive = false;
+			}
+		} catch (ClassNotLoadedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -68,34 +78,17 @@ public class ArrayInfo extends ObjectInfo{
 	}
 
 	public void setLink(){
-		
-		//try {
-			/*if(((ReferenceType) at.componentType()).isVerified() ||at.componentType() instanceof PrimitiveType){
-				isPrimitive = true;
-				for(int i = 0; i < size; i++){
-					arrayValue[i] = new ObjectInfo(ar.getValue(i));
+		if(isPrimitive){
+			
+		}else{
+			for(int i = 0; i < size; i++){
+				arrayValue[i] = om.searchObjectInfo((ObjectReference)array.getValue(i));
+				if(arrayValue[i] != null){
+					arrayValue[i].Linked();
+					this.Link();
 				}
-			}else{*/
-				isPrimitive = false;
-				for(int i = 0; i < size; i++){
-					System.out.println(array.getValue(i));
-					arrayValue[i] = om.searchObjectInfo((ObjectReference)array.getValue(i));
-					if(arrayValue[i] != null){
-						arrayValue[i].Linked();
-						this.Link();
-						//System.out.println("array[" + i + "] "+ arrayValue[i].object.referenceType() );
-					}
-					
-				}
-				
-				
-			/*}
-		} catch (ClassNotLoadedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-
-		
+			}
+		}
 	}
 	
 	public void calculateSize(){

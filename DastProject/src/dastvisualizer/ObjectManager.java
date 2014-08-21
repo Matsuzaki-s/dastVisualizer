@@ -13,11 +13,15 @@ import java.util.List;
 
 
 
+
+
+import com.sun.jdi.AbsentInformationException;
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.ArrayType;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
+import com.sun.jdi.IntegerType;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Type;
@@ -194,13 +198,12 @@ public class ObjectManager {
 	}
 	
 	private ClassDefinition isDefinedClass(ReferenceType tar){
+		System.out.println(tar.name());
 		for(Iterator<ClassDefinition> it = targetClass.iterator(); it.hasNext();){
 			ClassDefinition cld = ((ClassDefinition) it.next());
-			if(cld.getName().equals(tar.name())){
-				//System.out.println(cld.getName() + " " + tar.name());
+			if(tar.name().matches(".*\\." + cld.getName())){
 				return cld;
 			}
-			//System.out.println(cld.getName() + " " + tar.name());
 		}
 		return null;
 	}
@@ -233,12 +236,23 @@ public class ObjectManager {
 				objectInfo.add(object);
 				addObjectInfoMemory();
 				if(type != null && type instanceof ArrayType){
+					System.out.println("Array");
 					Field field = event.field();
-					addArray(tar, field, value);
+					/*try {
+						if(((ArrayType) type).componentType() instanceof IntegerType){
+							*/
+							addArray(tar, field, value);
+						/*}else{
+							addArray(tar, field, value);
+						}*/
+					/*} catch (ClassNotLoadedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}*/
 					object.Link();
 					addObjectInfoMemory();
 				}
-				//arrayCheck();
+				
 			}
 			
 		}
@@ -270,7 +284,17 @@ public class ObjectManager {
 		}
 		if(obInfo != null){			
 			if(type != null && type instanceof ArrayType){
-				addArray(object, field, value);
+				try {
+					if(((ArrayType) type).componentType() instanceof IntegerType){
+						System.out.println("Primitive");
+					addArray(object, field, value);
+					}else{
+						addArray(object, field, value);
+					}
+				} catch (ClassNotLoadedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			obInfo.changeField(field, value);
 			obInfo.setField();
@@ -291,7 +315,7 @@ public class ObjectManager {
 			}
 			
 		}
-	}
+	}	
 	
 
 	
