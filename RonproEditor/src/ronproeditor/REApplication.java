@@ -59,8 +59,6 @@ import clib.view.dialogs.CErrorDialog;
 
 import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
-
-
 /*
  * Ronpro Editor Application
  * 
@@ -911,8 +909,6 @@ public class REApplication implements ICFwApplication {
 
 	public void doDebugRun() {
 
-		
-		
 		File target = getSourceManager().getCurrentFile();
 		if (!hasRunnableFile(target)) {
 			JOptionPane.showMessageDialog(frame, "コンパイルに成功していません", "実行できません",
@@ -928,9 +924,6 @@ public class REApplication implements ICFwApplication {
 			// return;
 		}
 
-		
-				
-				
 		// パス等取得
 		JavaEnv env = FileSystemUtil.createJavaEnv(getSourceManager()
 				.getRootDirectory(), getSourceManager().getCurrentFile());
@@ -986,7 +979,7 @@ public class REApplication implements ICFwApplication {
 			public void speedSet(int speed) {
 				writePresLog(PRCommandLog.SubType.DEBUG_SPEED, speed);
 			}
-			
+
 			public void contPressed() {
 				writePresLog(PRCommandLog.SubType.DEBUG_CONT);
 			}
@@ -1004,17 +997,17 @@ public class REApplication implements ICFwApplication {
 			}
 		});
 
-		
-		
-		
+		System.out.println(env.dir.getAbsolutePath());
+
 		try {
-			//deno = new GUI(new FileInputStream("TestTarget\\BST\\BST.dust"));
-			deno = new GUI(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
+			deno = new GUI(new FileInputStream(env.dir.getAbsolutePath()
+					+ "\\DASTFile"));
+
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+
 		deno.run(args);
 		deno.getFrame().addWindowFocusListener(new WindowFocusListener() {
 			public void windowLostFocus(WindowEvent e) {
@@ -1033,19 +1026,14 @@ public class REApplication implements ICFwApplication {
 		cmdint.executeCommand("run");
 	}
 
-	//追加部分　DASTファイル選択*/////////////////////////////////////
+	// 追加部分　DASTファイル選択*/////////////////////////////////////
 	/*
-	private ReadDAST dastSelect(){
-		try {
-			return new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dust"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-	*/
-	
+	 * private ReadDAST dastSelect(){ try { return new ReadDAST(new
+	 * FileInputStream("TestTarget\\BST\\BST.dust")); } catch
+	 * (FileNotFoundException e) { // TODO Auto-generated catch block
+	 * e.printStackTrace(); } return null; }
+	 */
+
 	// Helper
 	public boolean hasRunnableFile(File source) {
 		if (source == null) {

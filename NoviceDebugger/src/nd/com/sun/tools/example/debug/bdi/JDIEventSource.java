@@ -124,10 +124,8 @@ class JDIEventSource extends Thread {
 				for (Iterator<JDIListener> it = session.runtime.jdiListeners.iterator(); 
 						it.hasNext(); ) {
 					JDIListener jl = (JDIListener)it.next();
-					System.out.println(jl.toString());
 					es.notify(jl);
 				}
-				System.out.println("---");
 				if (interrupted && !wantInterrupt) {
 					session.interrupted = false;
 					//### Catch here is a hack

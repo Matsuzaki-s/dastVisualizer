@@ -55,7 +55,7 @@ public class Draw extends JPanel {
 			ObjectInfo oin = (ObjectInfo)it.next();
 			//System.out.println(oin.object.toString());
 			//System.out.println(oin.isLinked() + " "+ oin.hasLink());
-			if(oin.isLinked() == true || oin.hasLink() == true){
+			if((oin.isLinked() == true || oin.hasLink() == true) && oin.set == true){
 				cellpanel.put(oin ,new CellPanel(oin));
 				
 				if(cellpanel.get(oin).getPreferredSize().width > CellWidth && oin.isArray() == false){

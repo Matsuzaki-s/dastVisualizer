@@ -265,7 +265,9 @@ public class ObjectManager {
 	public void renew(ObjectReference object, Field field, Value value){
 		ObjectInfo obInfo = isMadeObjectInfo(object);
 		Type type = null;
-		type = value.type();
+		if(value != null){
+			type = value.type();
+		}
 		if(obInfo != null){			
 			if(type != null && type instanceof ArrayType){
 				addArray(object, field, value);

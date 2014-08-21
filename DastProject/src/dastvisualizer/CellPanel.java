@@ -78,7 +78,7 @@ public class CellPanel extends JPanel {
 			Map<String, Object> field = cell.getAnotherField();
 			for (Iterator<Entry<String, Object>> it = field.entrySet().iterator(); it.hasNext();) {
 				Entry<String, Object> target = it.next();
-				str = target.getKey() + ": " + target.getValue(); 
+				str = target.getKey() + ":" + target.getValue(); 
 				cp.add(new CellParts(str));
 				cp_num++;
 	

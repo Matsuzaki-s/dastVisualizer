@@ -1,0 +1,10 @@
+Class:HashC, HashC$Cell, MyKey 
+HashC{
+	table[]:>
+}
+HashC$Cell{
+	key:v
+	next:>
+}
+MyKey{
+}

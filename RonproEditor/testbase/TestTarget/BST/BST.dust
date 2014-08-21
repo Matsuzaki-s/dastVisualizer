@@ -1,4 +1,4 @@
-Class:BinarySearchTree, Node, BSTTest
+Class:BinarySearchTree, Node
 BinarySearchTree{
 	root:v
 }

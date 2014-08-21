@@ -30,7 +30,7 @@ public class Visualize extends JFrame{
 	private JScrollPane mainPanel;
 
 	Visualize(List<ObjectInfo> cell){
-		this.setSize(1200, 700);
+		this.setSize(2000, 700);
 		this.setTitle("ver14");
 		this.setBackground(Color.WHITE);
 		this.setLocationRelativeTo(null);

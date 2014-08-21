@@ -227,9 +227,9 @@ public class ArrayInfo extends ObjectInfo{
 	}
 	
 	void setPosion(int ulx, int uly){
-		/*if(set == true){
+		if(set == true){
 			return;
-		}*/
+		}
 		
 		set = true;
 		
@@ -363,5 +363,27 @@ public class ArrayInfo extends ObjectInfo{
 	
 	public int getLength(){
 		return length;
+	}
+	
+	public int getUpHalf(){
+		return this.up_half;
+	}
+	
+	public int getBottomHalf(){
+		return this.bottom_half;
+	}
+	
+	public int getLeftHalf(){
+		return this.left_half;
+	}
+	
+	public int getRightHalf(){
+		return this.right_half;
+	}
+
+	public void setPxy(int x, int y) {
+		// TODO Auto-generated method stub
+		px = x;
+		py = y;
 	}
 }
