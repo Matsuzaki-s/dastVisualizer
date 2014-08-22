@@ -166,8 +166,8 @@ public class REBytecodeViewerGenerator {
 		commands.add("-o");
 		commands.add(target.getName());
 		commands.add(jasminName);
-		RECommandExecuter.executeCommandWait(commands, classFile.getParentFile(),
-				frame.getConsole());
+		RECommandExecuter.executeCommandWait(commands,
+				classFile.getParentFile(), frame.getConsole());
 		return target;
 	}
 }

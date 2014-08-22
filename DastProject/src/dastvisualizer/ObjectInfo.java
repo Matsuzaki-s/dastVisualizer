@@ -57,7 +57,8 @@ public class ObjectInfo {
 	
 	public boolean copy;
 	
-	ArrayInfo[] aroundArray = new ArrayInfo[8]; 
+	private ArrayInfo[] aroundArray = new ArrayInfo[8]; 
+	private String[] aroundArrayName = new String[8];
 	private int with = -1;
 	private String[] aroundFieldName = new String[8];
 	private Map<String, Object> anotherField = new HashMap<String,Object>();
@@ -123,8 +124,10 @@ public class ObjectInfo {
 			if(direction == null){
 				direction = fieldDirection.get(tar.name() + "[]");
 			}
-			if(direction != null && direction <= 7){
+			if(direction != null && direction <= 7 && aroundFieldName[direction] == null){
 				aroundFieldName[direction] = tar.name();
+			}else if(direction != null && direction <= 7 && aroundFieldName[direction] != null && aroundArrayName[direction] == null){
+				aroundArrayName[direction] = tar.name();
 			}else{
 				setAnotherField(tar.name(), object.getValue(tar));
 			}
@@ -178,11 +181,11 @@ public class ObjectInfo {
 				return i;
 			}
 		}
-		for(int i = 0; i <= 7; i++){
+		/*for(int i = 0; i <= 7; i++){
 			if(aroundFieldName[i] != null && aroundFieldName[i].equals(field.name() + "[]")){
 				return i;
 			}
-		}
+		}*/
 		return -1;
 	}
 	
@@ -202,14 +205,40 @@ public class ObjectInfo {
 				 direction = fieldDirection.get(field.name() + "[]");
 			}
 			if(direction != null && object.getValue(field) != null){
-				//if(around[direction] == null){
+				if(around[direction] == null){
 					around[direction] = om.searchObjectInfo((ObjectReference)object.getValue(field));
-					if(around[direction] != null){
-						around[direction].Linked();
-						//System.out.println(aroundFieldName[direction] + " " + around[direction].object.referenceType());
-						this.Link();
+					if(field.name() != aroundFieldName[direction]){
+						String copy = aroundArrayName[direction];
+						aroundArrayName[direction] = aroundFieldName[direction];
+						aroundFieldName[direction] = copy;							
 					}
-				//}
+				}else{
+					ObjectInfo obim = om.searchObjectInfo((ObjectReference)object.getValue(field));
+					if(obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
+						aroundArray[direction] = (ArrayInfo)obim;
+						if(field.name() != aroundArrayName[direction]){
+							String copy = aroundArrayName[direction];
+							aroundArrayName[direction] = aroundFieldName[direction];
+							aroundFieldName[direction] = copy;							
+						}
+					}else if(around[direction].isArray() && ((ArrayInfo)around[direction]).isPrimitive()){
+						aroundArray[direction] = (ArrayInfo)around[direction];
+						around[direction] = obim;
+						if(field.name() != aroundFieldName[direction]){
+							String copy = aroundArrayName[direction];
+							aroundArrayName[direction] = aroundFieldName[direction];
+							aroundFieldName[direction] = copy;							
+						}
+					}
+				}
+				if(around[direction] != null){
+					around[direction].Linked();
+					this.Link();
+				}
+				if(aroundArray[direction] != null){
+					aroundArray[direction].Linked();
+					this.Link();
+				}
 			}
 		}
 	}
@@ -225,6 +254,7 @@ public class ObjectInfo {
 	}
 	
 	public boolean sameObject(ObjectReference tar){
+		System.out.println(tar +" "+object);
 		return tar.equals(object);
 	}
 	

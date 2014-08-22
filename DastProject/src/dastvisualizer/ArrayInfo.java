@@ -13,6 +13,7 @@ import com.sun.jdi.ObjectReference;
 import com.sun.jdi.PrimitiveType;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.Type;
+import com.sun.jdi.Value;
 
 
 
@@ -21,6 +22,7 @@ public class ArrayInfo extends ObjectInfo{
 	private ArrayReference array;
 	private boolean isPrimitive = false;
 	private ObjectInfo[] arrayValue;
+	private Value[] primitiveArray;
 	private int directed;
 	private String fieldName;
 	private Type type;
@@ -47,29 +49,29 @@ public class ArrayInfo extends ObjectInfo{
 		array = (ArrayReference)(this.object);
 		this.directed = directed;
 		size = ((ArrayReference) tar).length();
-		arrayValue = new ObjectInfo[size];
 		this.fieldName = fieldName;
 		this.type = type;
-		try {
-			if(((ArrayType)type).componentType() instanceof PrimitiveType){
-				this.isPrimitive = true;
-			}else{
-				this.isPrimitive = false;
+		/*try {
+			System.out.println(((ArrayType)type).isPrepared());
+			System.out.println(type);
+			if(((ArrayType)type).isPrepared()){
+				if((((ArrayType)type).componentType() instanceof PrimitiveType ) || ((((ArrayType)type).componentType().toString().matches(".*" + "java.lang.String" + ".*")))){
+					this.isPrimitive = true;
+				}
 			}
 		} catch (ClassNotLoadedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 		
 	}
 
 	ArrayInfo(ObjectInfo source){
 		super(source);
 		array = (ArrayReference)(this.object);
-		isPrimitive = source.isPrimitive;
+		isPrimitive = ((ArrayInfo)source).isPrimitive;
 		this.directed = ((ArrayInfo)source).getDirection();
 		size = ((ArrayInfo)source).getSize();
-		arrayValue = new ObjectInfo[size];
 		this.type = source.type;
 		
 		this.fieldName = ((ArrayInfo)source).getFieldName();
@@ -78,20 +80,55 @@ public class ArrayInfo extends ObjectInfo{
 	}
 
 	public void setLink(){
+		try {
+			if(((ArrayType)type).isPrepared()){
+				if((((ArrayType)type).componentType() instanceof PrimitiveType ) || ((((ArrayType)type).componentType().toString().matches(".*" + "java.lang.String" + ".*")))){
+					this.isPrimitive = true;
+				}
+			}
+		} catch (ClassNotLoadedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(isPrimitive);
 		if(isPrimitive){
-			
+			if(primitiveArray == null){
+				primitiveArray = new Value[size];
+			}
+			for(int i = 0; i < size; i++){
+				primitiveArray[i] = array.getValue(i);
+			}
 		}else{
+			if(arrayValue == null){
+				arrayValue = new ObjectInfo[size];
+			}
 			for(int i = 0; i < size; i++){
 				arrayValue[i] = om.searchObjectInfo((ObjectReference)array.getValue(i));
 				if(arrayValue[i] != null){
 					arrayValue[i].Linked();
 					this.Link();
+				}else{
+					ObjectReference tar = (ObjectReference) array.getValue(i);
+					if(tar != null){
+					ClassDefinition cld = om.isDefinedClass(tar.referenceType());
+					if(cld != null){
+						om.getTargetObject().add(tar);
+						ObjectInfo object = new ObjectInfo(tar, (ReferenceType)tar.referenceType(), cld, om);
+						object.setField();
+						om.getObjectInfo().add(object);
+					}
+					}
 				}
+				
 			}
 		}
 	}
 	
 	public void calculateSize(){
+		if(isPrimitive == true){
+			calculatePrimitive();
+			return;
+		}
 		calculated =true;
 		if(directed == 3 || directed == 4){
 			ownLength = size + 1;
@@ -134,6 +171,27 @@ public class ArrayInfo extends ObjectInfo{
 	
 	}
 	
+	private void calculatePrimitive(){
+		calculated =true;
+		if(directed == 3 || directed == 4){
+			ownLength = size + 1;
+			ownWidth = 1;
+			
+			width = 1;
+			length = size + 1;
+
+		}else{
+
+			ownWidth = size;
+			ownLength = 1;
+			
+			width = size;
+			length = 1;
+					
+			
+		}
+		setPrimitiveSize();
+	}
 	
 	void setSize(){
 		int cent = size / 2;
@@ -215,11 +273,29 @@ public class ArrayInfo extends ObjectInfo{
 		}
 	}
 	
+	private void setPrimitiveSize(){
+		if(directed ==3 || directed == 4){
+			up_half = length / 2;
+			bottom_half = length - up_half;
+			right_half = 0;
+			left_half = 0;
+		}else{
+			up_half = 0;
+			bottom_half = 0;
+			right_half = width / 2;
+			left_half = width - right_half;
+		}
+	}
+	
 	void setPosion(){
 		setPosion(0,0);
 	}
 	
 	void setPosion(int ulx, int uly){
+		if(isPrimitive == true){
+			setPrimitivePosion(ulx, uly);
+			return;
+		}
 		if(set == true){
 			return;
 		}
@@ -298,6 +374,38 @@ public class ArrayInfo extends ObjectInfo{
 		}
 	}
 	
+	private void setPrimitivePosion(int ulx, int uly){
+		if(set == true){
+			return;
+		}
+		
+		set = true;
+		
+		if(with >= 0){
+			if(0 <= with && with <= 2){
+				px = ulx + getLeftHalf();
+				py = uly + getUpHalf() - 1;
+			}else if(with == 3){
+				px = ulx + getLeftHalf();
+				py = uly + getUpHalf();
+			}else if(with == 4){
+				px = ulx + getLeftHalf() + 1;
+				py = uly + getUpHalf();
+			}else{
+				px = ulx + getLeftHalf();
+				py = uly + getUpHalf() + 1;
+			}
+		}else{
+
+		px = ulx + getLeftHalf();
+		py = uly + getUpHalf();
+		}
+		
+		System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
+		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
+		System.out.println("ulx:" + ulx + " uly:" + uly);
+		System.out.println("width:" + getWidth() + " length:" + getLength());
+	}
 	boolean checkObject(Object obj){
 		return checkArray(obj);
 	}
@@ -379,4 +487,51 @@ public class ArrayInfo extends ObjectInfo{
 		px = x;
 		py = y;
 	}
+	
+	public Value getValue(int i){
+		return primitiveArray[i];
+	}
+
+	public boolean arrayUpdated() {
+		
+		for(int i = 0; i < size; i++){
+			
+			if(isPrimitive){
+				if(primitiveArray == null || array == null){
+					return false;
+				}
+				if(primitiveArray[i] != array.getValue(i)){
+					return true;
+				}
+				/*
+				if(primitiveArray[i]== null && array.getValue(i) == null){
+					return false;
+				}else if(primitiveArray[i] == null && array.getValue(i) != null){
+					return true;
+				}else if(primitiveArray[i] != null && array.getValue(i) == null){
+					return true;
+				}else if(primitiveArray[i] != array.getValue(i)){
+					return true;
+				}else{
+					return false;
+				}*/
+			}else if(!(isPrimitive)){
+				if(arrayValue == null || array == null){
+					return false;
+				}
+				if(arrayValue[i] == null && array.getValue(i) != null){
+					return true;
+				}else if(arrayValue[i] != null && array.getValue(i) == null){
+					return true;
+				}else if(arrayValue[i] != null && array.getValue(i) != null){
+					if(!(arrayValue[i].getobject().equals(array.getValue(i)))){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	
 }

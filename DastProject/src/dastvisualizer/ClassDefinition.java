@@ -17,7 +17,9 @@ public class ClassDefinition {
 	}
 	
 	public void setField(String fieldName, String dir){
+		System.out.println(fieldName+" " + dir);
 		fieldDirection.put(fieldName, numDirection(dir));
+		
 		numField++;
 	}
 	

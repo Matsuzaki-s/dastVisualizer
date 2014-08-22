@@ -21,8 +21,7 @@ public class RSFailureKnowledgeHistoryBrowser extends JFrame {
 	private REGeneRefManager manager;
 
 	public RSFailureKnowledgeHistoryBrowser(
-			RSFailureKnowledgeRepository repository,
-			REGeneRefManager manager) {
+			RSFailureKnowledgeRepository repository, REGeneRefManager manager) {
 		this.repository = repository;
 		this.manager = manager;
 		initialize();

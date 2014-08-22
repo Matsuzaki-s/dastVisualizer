@@ -39,8 +39,8 @@ public class NewZipUtil {
 			out.putNextEntry(entry);
 			byte buf[] = new byte[1024];
 			int count;
-			BufferedInputStream in = new BufferedInputStream(targetFile
-					.openInputStream());
+			BufferedInputStream in = new BufferedInputStream(
+					targetFile.openInputStream());
 			while ((count = in.read(buf, 0, 1024)) != -1) {
 				out.write(buf, 0, count);
 			}
@@ -51,7 +51,7 @@ public class NewZipUtil {
 
 	private static String createEntryPath(CDirectory base,
 			CFileElement fileElement) {
-		return fileElement.getRelativePath(base).toString().replaceAll("\\\\",
-				"/");
+		return fileElement.getRelativePath(base).toString()
+				.replaceAll("\\\\", "/");
 	}
 }

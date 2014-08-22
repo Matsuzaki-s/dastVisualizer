@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 
-
 public class RSErrorMessagePanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;

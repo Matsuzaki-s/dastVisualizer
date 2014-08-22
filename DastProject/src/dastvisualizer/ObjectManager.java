@@ -197,11 +197,16 @@ public class ObjectManager {
 		return false;
 	}
 	
-	private ClassDefinition isDefinedClass(ReferenceType tar){
-		System.out.println(tar.name());
+	public ClassDefinition isDefinedClass(ReferenceType tar){
+		
 		for(Iterator<ClassDefinition> it = targetClass.iterator(); it.hasNext();){
 			ClassDefinition cld = ((ClassDefinition) it.next());
-			if(tar.name().matches(".*\\." + cld.getName())){
+			System.out.println(tar.name() + " "+cld.getName());
+			if(tar.name().matches(".*\\.*" + cld.getName())){
+				System.out.println(cld.getName() + " "+ tar.name() );
+				return cld;
+			}else if(tar.name().equals(cld.getName())){
+				System.out.println(cld.getName() + " "+ tar.name() );
 				return cld;
 			}
 		}
@@ -230,25 +235,14 @@ public class ObjectManager {
 		}else{
 			ClassDefinition cld = isDefinedClass((ReferenceType) tar.referenceType());
 			if(cld != null){
-				targetObject.add(tar);
+				getTargetObject().add(tar);
 				ObjectInfo object = new ObjectInfo(tar, (ReferenceType)tar.referenceType(), cld, this);
 				object.setField();
-				objectInfo.add(object);
+				getObjectInfo().add(object);
 				addObjectInfoMemory();
 				if(type != null && type instanceof ArrayType){
-					System.out.println("Array");
 					Field field = event.field();
-					/*try {
-						if(((ArrayType) type).componentType() instanceof IntegerType){
-							*/
-							addArray(tar, field, value);
-						/*}else{
-							addArray(tar, field, value);
-						}*/
-					/*} catch (ClassNotLoadedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}*/
+					addArray(tar, field, value);
 					object.Link();
 					addObjectInfoMemory();
 				}
@@ -264,17 +258,11 @@ public class ObjectManager {
 			ClassDefinition cld = isDefinedClass((ClassType) from.referenceType());
 			int directed = cld.getDirectionbyName(field.name());
 			ArrayInfo array = new ArrayInfo((ObjectReference)value, value.type(), null, this, directed, field.name());
-			objectInfo.add(array);
+			getObjectInfo().add(array);
 			arrayInfo.add(array);
 		}
 	}
-	
-	/*public void arrayCheck(){
-		for(Iterator<ArrayInfo> it = arrayInfo.iterator(); it.hasNext();){
-			ArrayInfo ar = (ArrayInfo)it.next();
-			
-		}
-	}*/
+
 	
 	public void renew(ObjectReference object, Field field, Value value){
 		ObjectInfo obInfo = isMadeObjectInfo(object);
@@ -284,17 +272,7 @@ public class ObjectManager {
 		}
 		if(obInfo != null){			
 			if(type != null && type instanceof ArrayType){
-				try {
-					if(((ArrayType) type).componentType() instanceof IntegerType){
-						System.out.println("Primitive");
-					addArray(object, field, value);
-					}else{
-						addArray(object, field, value);
-					}
-				} catch (ClassNotLoadedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				addArray(object, field, value);
 			}
 			obInfo.changeField(field, value);
 			obInfo.setField();
@@ -302,10 +280,10 @@ public class ObjectManager {
 		}else{
 			ClassDefinition cld = isDefinedClass((ClassType) object.referenceType());
 			if(cld != null){
-				targetObject.add(object);
+				getTargetObject().add(object);
 				ObjectInfo obj = new ObjectInfo(object, (ClassType)object.referenceType(), cld, this);
 				obj.setField();
-				objectInfo.add(obj);
+				getObjectInfo().add(obj);
 				addObjectInfoMemory();
 				if(type != null && type instanceof ArrayType){
 					addArray(object, field, value);
@@ -320,7 +298,7 @@ public class ObjectManager {
 
 	
 	ObjectInfo isMadeObjectInfo(ObjectReference tar){
-		for(Iterator<ObjectInfo> it = objectInfo.iterator(); it.hasNext();){
+		for(Iterator<ObjectInfo> it = getObjectInfo().iterator(); it.hasNext();){
 			ObjectInfo obInfo = (ObjectInfo)it.next();
 			if(obInfo.getobject().equals(tar)){
 				return obInfo;
@@ -331,7 +309,7 @@ public class ObjectManager {
 	
 	private void addObjectInfoMemory(){
 		List<ObjectInfo> copy = new ArrayList<ObjectInfo>();
-		for(Iterator<ObjectInfo> it = objectInfo.iterator(); it.hasNext();){
+		for(Iterator<ObjectInfo> it = getObjectInfo().iterator(); it.hasNext();){
 			ObjectInfo tar = (ObjectInfo) it.next();
 			copy.add(tar.deepCopy());
 		}
@@ -347,6 +325,40 @@ public class ObjectManager {
 		}
 	}
 
+	public void updateArray(){
+		boolean updated = false;
+		if(objectInfoMemory.size() <= 0 || arrayInfo.size() <= 0){
+			return;
+		}
+		for(Iterator<ObjectInfo> it = objectInfoMemory.get(objectInfoMemory.size() - 1).iterator();it.hasNext();){
+			ObjectInfo tar = it.next();
+			if(tar.isArray()){
+				if(((ArrayInfo)tar).arrayUpdated()){
+					updated = true;
+				}
+			}
+		}
+		if(updated){
+			addObjectInfoMemory();
+			draw();
+		}
+	}
+
+	public List<ObjectReference> getTargetObject() {
+		return targetObject;
+	}
+
+	public void setTargetObject(List<ObjectReference> targetObject) {
+		this.targetObject = targetObject;
+	}
+
+	public List<ObjectInfo> getObjectInfo() {
+		return objectInfo;
+	}
+
+	public void setObjectInfo(List<ObjectInfo> objectInfo) {
+		this.objectInfo = objectInfo;
+	}
 	
 
 }

@@ -598,7 +598,7 @@ public class REFrame extends JFrame {
 		// }
 		// });
 		// useRSSystem.setEnabled(true);
-		
+
 		{
 			Action action = new AbstractAction() {
 				public void actionPerformed(ActionEvent e) {
@@ -606,8 +606,8 @@ public class REFrame extends JFrame {
 				}
 			};
 			action.putValue(Action.NAME, "Open PPV");
-			//action.putValue(Action.ACCELERATOR_KEY,
-			//		KeyStroke.getKeyStroke(KeyEvent.VK_B, CTRL_MASK));
+			// action.putValue(Action.ACCELERATOR_KEY,
+			// KeyStroke.getKeyStroke(KeyEvent.VK_B, CTRL_MASK));
 			action.setEnabled(true);
 			actionOpenPPV = action;
 		}

@@ -20,19 +20,21 @@ public class ZipUtil {
 	 * @throws IOException
 	 *             入出力例外
 	 */
-	public static void createZip(String zipFile, String targetDir ) throws IOException {
-		createZip( zipFile, new String[]{ targetDir } );
+	public static void createZip(String zipFile, String targetDir)
+			throws IOException {
+		createZip(zipFile, new String[] { targetDir });
 	}
+
 	public static void createZip(String zipFile, String[] targetFiles)
 			throws IOException {
 
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
-		
-//		if( OSUtil.isWindows() )
-//			out.setEncoding("MS932"); 
-//		else if( OSUtil.isMac() )
-//			out.setEncoding("UTF-8");
-		
+
+		// if( OSUtil.isWindows() )
+		// out.setEncoding("MS932");
+		// else if( OSUtil.isMac() )
+		// out.setEncoding("UTF-8");
+
 		for (int i = 0; i < targetFiles.length; i++) {
 			File file = new File(targetFiles[i]);
 			createZip(out, file);
@@ -81,8 +83,9 @@ public class ZipUtil {
 	 * @return ZIPエントリのパス
 	 */
 	private static String getEntryPath(File file) {
-//		int deleteLength = file.getPath().length() - file.getName().length();
-//		return file.getPath().replaceAll("\\\\", "/").substring(deleteLength);
+		// int deleteLength = file.getPath().length() - file.getName().length();
+		// return file.getPath().replaceAll("\\\\",
+		// "/").substring(deleteLength);
 		return file.getPath().replaceAll("\\\\", "/");
 	}
 

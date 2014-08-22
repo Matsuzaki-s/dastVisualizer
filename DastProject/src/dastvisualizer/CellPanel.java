@@ -46,19 +46,16 @@ public class CellPanel extends JPanel {
 		setBorder(border);
 
 		tar = cell.getobject();
-		try {
 			if (!(cell.isArray())) {
 				makeObjectCell(cell);
 				length = cp_num;
 			} else if(((ArrayInfo)cell).isPrimitive() == false){
 				makeArrayCell((ArrayInfo) cell);
-			}/*else{
-				makePrimitiveArray((MyPrimitiveArray) cell);
-			}*/
+			}else{
+				makePrimitiveArray((ArrayInfo) cell);
+			}
 
-		} catch (Exception e) {
-			System.out.println(e + " CellPanel");
-		}
+
 		setVisible(true);
 
 	}
@@ -274,14 +271,14 @@ public class CellPanel extends JPanel {
 
 	}
 	
-	/*private void makePrimitiveArray(MyPrimitiveArray cell){
-		String str = cell.getName();
-		cp[cp_num] = new CellParts(str);
-		cp[cp_num].setBackground(Color.YELLOW);
+	private void makePrimitiveArray(ArrayInfo cell){
+		String str = cell.getFieldName();
+		cp.add(new CellParts(str));
+		cp.get(cp_num).setBackground(Color.YELLOW);
 		cp_num++;
 
-		CellParts[] idl = new CellParts[cell.array.length];
-		CellParts[] ll = new CellParts[cell.array.length];
+		CellParts[] idl = new CellParts[cell.getSize()];
+		CellParts[] ll = new CellParts[cell.getSize()];
 
 		JPanel IDL = new JPanel();
 		JPanel LL = new JPanel();
@@ -295,7 +292,7 @@ public class CellPanel extends JPanel {
 		}
 		IDL.setOpaque(true);
 		IDL.setBackground(Color.WHITE);
-		for (int i = 0; i < cell.array.length; i++) {
+		for (int i = 0; i < cell.getSize(); i++) {
 			idl[i] = new CellParts(Integer.toString(i));
 			idl[i].setBackground(Color.white);
 		}
@@ -303,9 +300,13 @@ public class CellPanel extends JPanel {
 
 		LL.setOpaque(true);
 		LL.setBackground(Color.WHITE);
-		for (int i = 0; i < cell.array.length; i++) {
-			ll[i] = new CellParts(Integer.toString(cell.array[i]));
-
+		for (int i = 0; i < cell.getSize(); i++) {
+			if(cell.getValue(i) != null){
+			ll[i] = new CellParts(cell.getValue(i).toString());
+			System.out.println(cell.getValue(i).toString());
+			}else{
+				ll[i] = new CellParts("null");
+			}
 
 
 			ll[i].setBackground(Color.white);
@@ -329,35 +330,35 @@ public class CellPanel extends JPanel {
 		LL.setVisible(true);
 
 		if (cell.getDirection() >= 0 && cell.getDirection() <= 2) {
-			IDL.setMaximumSize(new Dimension(30 * cell.array.length,18));
-			LL.setMaximumSize(new Dimension(30*cell.array.length, 18));
+			IDL.setMaximumSize(new Dimension(30 * cell.getSize(),18));
+			LL.setMaximumSize(new Dimension(30*cell.getSize(), 18));
 			add(IDL);
 			add(LL);
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(new Dimension(cell.array.length * 30,18));
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(new Dimension(cell.getSize() * 30,18));
+				add(cp.get(i));
 			}
 			
 			length = 3;
 
 		} else if (cell.getDirection() >= 6 && cell.getDirection() <= 7) {
-			IDL.setMaximumSize(new Dimension(30 * cell.array.length,18));
-			LL.setMaximumSize(new Dimension(30*cell.array.length, 18));
+			IDL.setMaximumSize(new Dimension(30 * cell.getSize(),18));
+			LL.setMaximumSize(new Dimension(30*cell.getSize(), 18));
 
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(new Dimension(cell.array.length * 30,18));
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(new Dimension(cell.getSize() * 30,18));
+				add(cp.get(i));
 			}
 			add(IDL);
 			add(LL);
 			length = 3;
 		} else {
 			for (int i = 0; i < cp_num; i++) {
-				cp[i].setAlignmentX(0.0f);
-				cp[i].setMaximumSize(new Dimension(60,18));
-				add(cp[i]);
+				cp.get(i).setAlignmentX(0.0f);
+				cp.get(i).setMaximumSize(new Dimension(60,18));
+				add(cp.get(i));
 			}
 
 			JPanel subPanel = new JPanel();
@@ -368,16 +369,16 @@ public class CellPanel extends JPanel {
 			subPanel.setVisible(true);
 			add(subPanel);
 
-			cp[0].setAlignmentX(0.5f);
-			IDL.setMaximumSize(new Dimension(30 ,18*cell.array.length));
-			LL.setMaximumSize(new Dimension(30, 18*cell.array.length));
-			subPanel.setMaximumSize(new Dimension(60, 18*cell.array.length));
-			this.setMaximumSize(new Dimension(60, 18*(cell.array.length +1)+5));
-			this.setPreferredSize(new Dimension(60, 18*(cell.array.length +1)+5));
+			cp.get(0).setAlignmentX(0.5f);
+			IDL.setMaximumSize(new Dimension(30 ,18*cell.getSize()));
+			LL.setMaximumSize(new Dimension(30, 18*cell.getSize()));
+			subPanel.setMaximumSize(new Dimension(60, 18*cell.getSize()));
+			this.setMaximumSize(new Dimension(60, 18*(cell.getSize() +1)+5));
+			this.setPreferredSize(new Dimension(60, 18*(cell.getSize() +1)+5));
 
-			length = cell.array.length;
+			length = cell.getSize();
 		}
-	}*/
+	}
 
 	private void adjustSize() {
 		Dimension dim;

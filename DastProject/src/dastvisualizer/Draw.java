@@ -32,9 +32,6 @@ public class Draw extends JPanel {
 	}
 	
 	Draw(List<ObjectInfo> tar){
-		
-		
-		
 		super();
 		System.out.println();
 		setLayout(null);
@@ -82,7 +79,7 @@ public class Draw extends JPanel {
 				add(panel);
 			}
 			}catch(Exception e){
-				System.out.println(e);
+				e.printStackTrace();
 			}
 		}
 	}
@@ -186,6 +183,7 @@ public class Draw extends JPanel {
 			}
 		}
 		}else{
+			if(!((ArrayInfo)oin).isPrimitive()){
 			ArrayInfo array = (ArrayInfo)(oin);
 			ObjectInfo[] arrayValue = array.getArrayValue();
 			for(int i = 0; i < arrayValue.length; i++){
@@ -209,6 +207,7 @@ public class Draw extends JPanel {
 				}
 					
 			}
+		}
 		}
 
 	}

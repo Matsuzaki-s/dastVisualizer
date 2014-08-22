@@ -6,7 +6,7 @@
 package ronproeditor.source;
 
 /**
- *　一行スキャンした結果を表わすインナークラスです。
+ * 　一行スキャンした結果を表わすインナークラスです。
  */
 public class ScanResult {
 	private int openBraceCount = 0;
@@ -21,14 +21,14 @@ public class ScanResult {
 	}
 
 	/**
-	 *　読み込んだ行の開き中括弧の数を増やします
+	 * 　読み込んだ行の開き中括弧の数を増やします
 	 */
 	public void addOpenBraceCount() {
 		openBraceCount++;
 	}
 
 	/**
-	 *　読み込んだ行の閉じ中括弧の数を増やします
+	 * 　読み込んだ行の閉じ中括弧の数を増やします
 	 */
 	public void addCloseBraceCount() {
 		closeBraceCount++;
@@ -38,15 +38,13 @@ public class ScanResult {
 	}
 
 	/**
-	 * 閉じカッコが開き括弧のあとに呼ばれたとき
-	 * 要するに  {return;}  等の行だったときに
-	 * １を返します。
+	 * 閉じカッコが開き括弧のあとに呼ばれたとき 要するに {return;} 等の行だったときに １を返します。
 	 */
 	public int getCloseSecond() {
 		return isCloseSecond ? 1 : 0;
 	}
 
-	//  ----------------- setter & getter ----------------
+	// ----------------- setter & getter ----------------
 
 	public void setInComment(boolean inComment) {
 		ScanResult.this.inComment = inComment;

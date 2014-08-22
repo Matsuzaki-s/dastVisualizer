@@ -98,6 +98,7 @@ class JDIEventSource extends Thread {
 		} catch (Exception exc) {
 			//### Do something different for InterruptedException???
 			// just exit
+			System.out.println(exc);
 		}
 		session.running = false;
 	}
@@ -107,9 +108,10 @@ class JDIEventSource extends Thread {
 		do {
 			EventSet jdiEventSet = queue.remove();
 			es = AbstractEventSet.toSpecificEventSet(jdiEventSet);
-			
+			objm.updateArray();
 			session.interrupted = es.suspendedAll();
 			dispatchEventSet(es);
+			
 		} while(!(es instanceof VMDisconnectEventSet));
 	}
 
@@ -206,6 +208,7 @@ class JDIEventSource extends Thread {
 		}
 
 		public void modificationWatchpoint(ModificationWatchpointEventSet e)  {
+			objm.updateArray();
 			objm.renew(e.getObject(), e.getField(), e.getValueToBe());
 	    	objm.setLink();
 	    	objm.draw();
