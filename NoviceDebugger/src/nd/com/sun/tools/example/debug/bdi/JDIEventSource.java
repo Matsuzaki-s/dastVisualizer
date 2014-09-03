@@ -108,7 +108,7 @@ class JDIEventSource extends Thread {
 		do {
 			EventSet jdiEventSet = queue.remove();
 			es = AbstractEventSet.toSpecificEventSet(jdiEventSet);
-			objm.updateArray();
+			//objm.updateArray();
 			session.interrupted = es.suspendedAll();
 			dispatchEventSet(es);
 			
@@ -117,7 +117,7 @@ class JDIEventSource extends Thread {
 
 	//### Gross foul hackery!
 	private void dispatchEventSet(final AbstractEventSet es) {
-		System.out.println(es);
+		//System.out.println(es);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				boolean interrupted = es.suspendedAll();

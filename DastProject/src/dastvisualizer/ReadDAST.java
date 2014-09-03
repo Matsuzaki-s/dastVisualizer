@@ -80,6 +80,7 @@ public class ReadDAST extends StreamTokenizer {
 			
 		} catch (Exception e) {
 			System.err.println("Exception :" + e);
+			e.printStackTrace();
 		}
 	}
 	

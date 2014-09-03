@@ -181,7 +181,7 @@ public class NBlockViewTool extends JPanel{
 				try{
 					rb.resetHighlight();
 				} catch(java.lang.NullPointerException e) {
-					
+					e.printStackTrace();
 				}
 			}
 		}

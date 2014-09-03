@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sun.jdi.ArrayType;
+import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.ClassObjectReference;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
+import com.sun.jdi.IntegerType;
 import com.sun.jdi.IntegerValue;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.PrimitiveValue;
@@ -126,15 +128,15 @@ public class ObjectInfo {
 			}
 			if(direction != null && direction <= 7 && aroundFieldName[direction] == null){
 				aroundFieldName[direction] = tar.name();
-			}else if(direction != null && direction <= 7 && aroundFieldName[direction] != null && aroundArrayName[direction] == null){
-				aroundArrayName[direction] = tar.name();
+			}else if(direction != null && direction <= 7 && aroundFieldName[direction] != null && aroundFieldName[direction] != tar.name() &&  getAroundArrayName()[direction] == null){
+				getAroundArrayName()[direction] = tar.name();
 			}else{
-				setAnotherField(tar.name(), object.getValue(tar));
+				setAnotherField(tar, object.getValue(tar));
 			}
 		}
 	}
 	
-	public void changeField(ModificationWatchpointEvent event){
+	/*public void changeField(ModificationWatchpointEvent event){
 		ObjectReference object = event.object();
 		Field field = event.field();
 		Value value = event.valueToBe();
@@ -146,7 +148,7 @@ public class ObjectInfo {
 			if (direction >= 0) {
 				around[direction] = om.searchObjectInfo((ObjectReference) value);
 			} else {
-				setAnotherField(field.name(), value);
+				setAnotherField(field, value);
 			}
 			
 		
@@ -159,19 +161,24 @@ public class ObjectInfo {
 			around[direction] = om.searchObjectInfo((ObjectReference)value);
 		}else{
 			
-			setAnotherField(field.name(), value);
+			setAnotherField(field, value);
 		}
-	}
+	}*/
 
-	public void setAnotherField(String name, Value value){
-		if(value instanceof IntegerValue){
-			anotherField.put("int " + name, ((IntegerValue)value).value());
-		}else if(value instanceof StringReference){
-			anotherField.put("String " + name, value);
-		}else if(value instanceof ObjectReference){
-			if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
-				anotherField.put("Integer " + name,  (ObjectReference)value);
+	public void setAnotherField(Field field, Value value){
+		try {
+			if(field.type() instanceof IntegerType){
+				anotherField.put("int " + field.name(), ((IntegerValue)value).value());
+			}else if(value instanceof StringReference){
+				anotherField.put("String " + field.name(), value);
+			}else if(value instanceof ObjectReference){
+				if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
+					anotherField.put("Integer " + field.name(),  (ObjectReference)value);
+					}
 			}
+		} catch (ClassNotLoadedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -208,25 +215,25 @@ public class ObjectInfo {
 				if(around[direction] == null){
 					around[direction] = om.searchObjectInfo((ObjectReference)object.getValue(field));
 					if(field.name() != aroundFieldName[direction]){
-						String copy = aroundArrayName[direction];
-						aroundArrayName[direction] = aroundFieldName[direction];
+						String copy = getAroundArrayName()[direction];
+						getAroundArrayName()[direction] = aroundFieldName[direction];
 						aroundFieldName[direction] = copy;							
 					}
 				}else{
 					ObjectInfo obim = om.searchObjectInfo((ObjectReference)object.getValue(field));
-					if(obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
-						aroundArray[direction] = (ArrayInfo)obim;
-						if(field.name() != aroundArrayName[direction]){
-							String copy = aroundArrayName[direction];
-							aroundArrayName[direction] = aroundFieldName[direction];
+					if(obim!= null && obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
+						getAroundArray()[direction] = (ArrayInfo)obim;
+						if(field.name() != getAroundArrayName()[direction]){
+							String copy = getAroundArrayName()[direction];
+							getAroundArrayName()[direction] = aroundFieldName[direction];
 							aroundFieldName[direction] = copy;							
 						}
 					}else if(around[direction].isArray() && ((ArrayInfo)around[direction]).isPrimitive()){
-						aroundArray[direction] = (ArrayInfo)around[direction];
+						getAroundArray()[direction] = (ArrayInfo)around[direction];
 						around[direction] = obim;
 						if(field.name() != aroundFieldName[direction]){
-							String copy = aroundArrayName[direction];
-							aroundArrayName[direction] = aroundFieldName[direction];
+							String copy = getAroundArrayName()[direction];
+							getAroundArrayName()[direction] = aroundFieldName[direction];
 							aroundFieldName[direction] = copy;							
 						}
 					}
@@ -235,8 +242,8 @@ public class ObjectInfo {
 					around[direction].Linked();
 					this.Link();
 				}
-				if(aroundArray[direction] != null){
-					aroundArray[direction].Linked();
+				if(getAroundArray()[direction] != null){
+					getAroundArray()[direction].Linked();
 					this.Link();
 				}
 			}
@@ -254,7 +261,7 @@ public class ObjectInfo {
 	}
 	
 	public boolean sameObject(ObjectReference tar){
-		System.out.println(tar +" "+object);
+		//System.out.println(tar +" "+object);
 		return tar.equals(object);
 	}
 	
@@ -320,7 +327,7 @@ public class ObjectInfo {
 			}
 		}
 		
-		if(aroundArray[5] != null || aroundArray[6] != null || aroundArray[7] != null){
+		if(getAroundArray()[5] != null || getAroundArray()[6] != null || getAroundArray()[7] != null){
 			around_size[down_length] ++;
 		}
 		
@@ -340,10 +347,10 @@ public class ObjectInfo {
 			}
 		}
 		
-		if(aroundArray[3] != null){
+		if(getAroundArray()[3] != null){
 			around_size[cent_left_width]++;
 		}
-		if(aroundArray[4] != null){
+		if(getAroundArray()[4] != null){
 			around_size[cent_right_width]++;
 		}
 		
@@ -358,7 +365,7 @@ public class ObjectInfo {
 			}
 		}
 		
-		if(aroundArray[0] != null || aroundArray[1] != null || aroundArray[2] != null){
+		if(getAroundArray()[0] != null || getAroundArray()[1] != null || getAroundArray()[2] != null){
 			around_size[up_length] ++;
 		}
 		
@@ -450,14 +457,18 @@ public class ObjectInfo {
 		
 		//ReadFile.setMap(this);
 		}
-		System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
+		/*System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
-		System.out.println();
+		System.out.println();*/
 		
 		if(around[5] != null){
 			int cw = 0;
+			int with = 0;
+			if(aroundArray[5] != null){
+				with  = 1;
+			}
 			if(around[1] != null){
 				cw = around[1].getLeftHalf();
 			}
@@ -465,21 +476,25 @@ public class ObjectInfo {
 				cw = around[6].getLeftHalf();
 			}
 			if(around[3] == null){
-				around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength);
+				around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength + with);
 			}else{
-				around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength);
+				around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength + with);
 			}
 			
 			if(aroundArray[5] != null){
-				aroundArray[5].setPxy(around[5].getPx(), around[5].getPy() -1);
+				aroundArray[5].setPxy(around[5].getPx(), py + 1);
 			}
 		}
 		
 		if(around[6] != null){
-			around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength);
+			int with = 0;
+			if(aroundArray[6] != null){
+				with = 1;
+			}
+			around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength + with);
 			
 			if(aroundArray[6] != null){
-				aroundArray[6].setPxy(around[6].getPx(), around[6].getPy() - 1);
+				aroundArray[6].setPxy(around[6].getPx(), py + 1);
 				
 			}
 			
@@ -487,6 +502,10 @@ public class ObjectInfo {
 		
 		if(around[7] != null){
 			int cw = 0;
+			int with = 0;
+			if(aroundArray[7] != null){
+				with = 1;
+			}
 			
 			if(around[1] != null){
 				cw = around[1].getRightHalf();
@@ -496,13 +515,13 @@ public class ObjectInfo {
 			}
 			
 			if(around[4] == null){
-				around[7].setPosion( px + 1 + cw, py + ownLength);
+				around[7].setPosion( px + 1 + cw, py + ownLength + with);
 			}else{
-				around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength );
+				around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength + with);
 			}
 			
 			if(aroundArray[7] != null){
-				aroundArray[7].setPxy(around[7].getPx(), around[7].getPy() - 1);
+				aroundArray[7].setPxy(around[7].getPx(), py + 1);
 			
 			}
 		}
@@ -510,6 +529,10 @@ public class ObjectInfo {
 		
 		if(around[4] != null){
 			int cw = 0;
+			int with = 0;
+			if(aroundArray[4] != null){
+				with = 1;
+			}
 			
 			if(around[1] != null && around[4].up_half > 0){
 				cw = around[1].getRightHalf();
@@ -519,14 +542,18 @@ public class ObjectInfo {
 			}
 			
 			//cw = 0; //ˆêŽž—lŽqŒ©
-			around[4].setPosion(px + 1 + cw, py - around[4].getUpHalf());
+			around[4].setPosion(px + 1 + cw + with, py - around[4].getUpHalf());
 			
 			if(aroundArray[4] != null){
-				aroundArray[4].setPxy(around[4].getPx() - 1, around[4].getPy());
+				aroundArray[4].setPxy(px + 1, around[4].getPy());
 				
 			}
 		}
 		if(around[3] != null){
+			int with = 0;
+			if(aroundArray[3] != null){
+				with = 1;
+			}
 			int cw = 0;
 			if(around[1] != null && around[3].up_half > 0){
 				cw = around[1].getLeftHalf();
@@ -541,11 +568,10 @@ public class ObjectInfo {
 			
 			
 		if(aroundArray[3] != null){
-				around[3].setPosion(px - around[3].getWidth() - cw - 1, py - around[3].getUpHalf());
+				around[3].setPosion(px - around[3].getWidth() - cw - with, py - around[3].getUpHalf());
 				
 							
-				aroundArray[3].setPxy(around[3].getPx() + 1, around[3].getPy());
-
+				aroundArray[3].setPxy(px - 1 , around[3].getPy());
 			}else{	
 				around[3].setPosion(px - around[3].getWidth() - cw, py - around[3].getUpHalf());	
 			}
@@ -556,6 +582,10 @@ public class ObjectInfo {
 		
 		if(around[2] != null){
 			int cw = 0;
+			int with = 0;
+			if(aroundArray[2] != null){
+				with = 1;
+			}
 			if(around[1] != null){
 				cw = around[1].getRightHalf();
 			}
@@ -563,20 +593,23 @@ public class ObjectInfo {
 				cw = around[6].getRightHalf();
 			}
 			if(around[4] == null){
-				around[2].setPosion(px + 1 + cw, py - around[2].getLength());
+				around[2].setPosion(px + 1 + cw, py - around[2].getLength() - with);
 			}else{
-				around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength());
+				around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength()-with);
 			}
 			if(aroundArray[2] != null){
-				aroundArray[2].setPxy(around[2].getPx(), around[2].getPy() -1);
-			
+				aroundArray[2].setPxy(around[2].getPx(), py - 1);
 			}
 		}
 		
 		if(around[1] != null){
-			around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength());
+			int with = 0;
 			if(aroundArray[1] != null){
-				aroundArray[1].setPxy(around[1].getPx(), around[1].getPy() -1);
+				with = 1;
+			}
+			around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength() - with);
+			if(aroundArray[1] != null){
+				aroundArray[1].setPxy(around[1].getPx(), py - 1);
 			
 			}
 		}
@@ -584,6 +617,10 @@ public class ObjectInfo {
 		
 		if(around[0] != null){
 			int cw = 0;
+			int with = 0;
+			if(aroundArray[0] != null){
+				with = 1;
+			}
 			if(around[1] != null){
 				cw = around[1].getLeftHalf();
 			}
@@ -591,12 +628,12 @@ public class ObjectInfo {
 				cw = around[6].getLeftHalf();
 			}
 			if(around[3] == null){
-				around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength());
+				around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength() - with);
 			}else{
-				around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf());
+				around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf() - with);
 			}
 			if(aroundArray[0] != null){
-				aroundArray[0].setPxy(around[0].getPx(), around[0].getPy() - 1);
+				aroundArray[0].setPxy(around[0].getPx(), py + 1);
 			
 			}
 		}
@@ -733,6 +770,22 @@ public class ObjectInfo {
 		ObjectInfo tar = new ObjectInfo(this);
 		return tar;
 		
+	}
+
+	public String[] getAroundArrayName() {
+		return aroundArrayName;
+	}
+
+	public void setAroundArrayName(String[] aroundArrayName) {
+		this.aroundArrayName = aroundArrayName;
+	}
+
+	public ArrayInfo[] getAroundArray() {
+		return aroundArray;
+	}
+
+	public void setAroundArray(ArrayInfo[] aroundArray) {
+		this.aroundArray = aroundArray;
 	}
 
 	

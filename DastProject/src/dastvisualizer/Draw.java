@@ -33,7 +33,6 @@ public class Draw extends JPanel {
 	
 	Draw(List<ObjectInfo> tar){
 		super();
-		System.out.println();
 		setLayout(null);
 		setBackground(Color.WHITE);
 				

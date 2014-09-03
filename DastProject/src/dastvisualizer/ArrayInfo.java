@@ -81,7 +81,16 @@ public class ArrayInfo extends ObjectInfo{
 
 	public void setLink(){
 		try {
-			if(((ArrayType)type).isPrepared()){
+			boolean isRead = false;
+			for(int i = 0; i < size; i++){
+				if(array != null && array.getValue(i) != null){
+					isRead = true;
+					break;
+				}else if(array == null){
+					//System.out.println("E1");
+				}
+			}
+			if(isRead){
 				if((((ArrayType)type).componentType() instanceof PrimitiveType ) || ((((ArrayType)type).componentType().toString().matches(".*" + "java.lang.String" + ".*")))){
 					this.isPrimitive = true;
 				}
@@ -90,7 +99,7 @@ public class ArrayInfo extends ObjectInfo{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println(isPrimitive);
+		//System.out.println(isPrimitive);
 		if(isPrimitive){
 			if(primitiveArray == null){
 				primitiveArray = new Value[size];
@@ -322,12 +331,12 @@ public class ArrayInfo extends ObjectInfo{
 		py = uly + getUpHalf();
 		}
 		
-		System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
+		/*System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
 		System.out.println();
-		
+		*/
 		if(directed >= 0 && directed <= 2){
 			int nx = 0;
 			for(int i = 0; i < size; i++){
@@ -401,10 +410,10 @@ public class ArrayInfo extends ObjectInfo{
 		py = uly + getUpHalf();
 		}
 		
-		System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
+		/*System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
-		System.out.println("width:" + getWidth() + " length:" + getLength());
+		System.out.println("width:" + getWidth() + " length:" + getLength());*/
 	}
 	boolean checkObject(Object obj){
 		return checkArray(obj);
@@ -484,6 +493,7 @@ public class ArrayInfo extends ObjectInfo{
 
 	public void setPxy(int x, int y) {
 		// TODO Auto-generated method stub
+		set = true;
 		px = x;
 		py = y;
 	}

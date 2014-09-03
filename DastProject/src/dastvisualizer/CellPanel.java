@@ -76,7 +76,7 @@ public class CellPanel extends JPanel {
 			for (Iterator<Entry<String, Object>> it = field.entrySet().iterator(); it.hasNext();) {
 				Entry<String, Object> target = it.next();
 				if(target.getKey().matches(".*" + "Integer" + ".*")){
-					System.out.println(((ObjectReference) target.getValue()).referenceType());
+					//System.out.println(((ObjectReference) target.getValue()).referenceType());
 					str = target.getKey() + ":" + ((Integer)(target.getValue())).intValue();
 				}else{
 					
@@ -135,11 +135,25 @@ public class CellPanel extends JPanel {
 						cp_num++;
 					}
 				}
+				/*if(cell.getAroundArrayName()[i] != null ){
+					if(cell.getAroundArray()[i] != null){
+						str = cell.getAroundArrayName()[i] + " " 
+								+ cell.getAround()[i].getobject().referenceType().name();
+						cp.add(new CellParts(str, Color.ORANGE));
+						cp_num++;
+						
+					}else{
+						str = cell.getAroundArrayName()[i] + " " + "null";
+						cp.add(new CellParts(str, Color.ORANGE));
+						cp_num++;
+					}
+				}*/
 			}
 			
 
 		} catch (Exception e) {
 			System.out.println(e + " makeObjectCell");
+			e.printStackTrace();
 		}
 
 		adjustSize();
@@ -303,7 +317,7 @@ public class CellPanel extends JPanel {
 		for (int i = 0; i < cell.getSize(); i++) {
 			if(cell.getValue(i) != null){
 			ll[i] = new CellParts(cell.getValue(i).toString());
-			System.out.println(cell.getValue(i).toString());
+			//System.out.println(cell.getValue(i).toString());
 			}else{
 				ll[i] = new CellParts("null");
 			}

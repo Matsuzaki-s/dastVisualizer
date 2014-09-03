@@ -108,7 +108,7 @@ public class ObjectManager {
 		if(objectInfoMemory.size() > 0){
 		List<ObjectInfo> tar = objectInfoMemory.get(objectInfoMemory.size() - 1);
 
-		System.out.println();
+		//System.out.println();
 		
 		if(visualize == null){
 			set(tar);
@@ -118,7 +118,7 @@ public class ObjectManager {
 			set(tar);
 			visualize.reDraw(tar);
 		}
-		System.out.println();
+		//System.out.println();
 		}
 	}
 	
@@ -201,12 +201,12 @@ public class ObjectManager {
 		
 		for(Iterator<ClassDefinition> it = targetClass.iterator(); it.hasNext();){
 			ClassDefinition cld = ((ClassDefinition) it.next());
-			System.out.println(tar.name() + " "+cld.getName());
+			//System.out.println(tar.name() + " "+cld.getName());
 			if(tar.name().matches(".*\\.*" + cld.getName())){
-				System.out.println(cld.getName() + " "+ tar.name() );
+				//System.out.println(cld.getName() + " "+ tar.name() );
 				return cld;
 			}else if(tar.name().equals(cld.getName())){
-				System.out.println(cld.getName() + " "+ tar.name() );
+				//System.out.println(cld.getName() + " "+ tar.name() );
 				return cld;
 			}
 		}
@@ -229,7 +229,7 @@ public class ObjectManager {
 				addArray(tar, field, value);
 				obInfo.Link();
 			}
-			obInfo.changeField(event);
+			//obInfo.changeField(event);
 			obInfo.setField();
 			addObjectInfoMemory();
 		}else{
@@ -274,10 +274,11 @@ public class ObjectManager {
 			if(type != null && type instanceof ArrayType){
 				addArray(object, field, value);
 			}
-			obInfo.changeField(field, value);
+			//obInfo.changeField(field, value);
 			obInfo.setField();
 			addObjectInfoMemory();
 		}else{
+			if(object != null){
 			ClassDefinition cld = isDefinedClass((ClassType) object.referenceType());
 			if(cld != null){
 				getTargetObject().add(object);
@@ -291,7 +292,7 @@ public class ObjectManager {
 					addObjectInfoMemory();
 				}
 			}
-			
+			}
 		}
 	}	
 	
