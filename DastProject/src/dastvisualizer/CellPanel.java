@@ -414,7 +414,8 @@ public class CellPanel extends JPanel {
 	}
 
 	public int getCellLength() {
-		return this.length * 18 ;
+		return this.getPreferredSize().height ;
+		//return this.length * 17 ; ‚È‚ñ‚Å‰‚ß‚±‚Á‚¿‚Å‘‚¢‚½H
 	}
 
 }

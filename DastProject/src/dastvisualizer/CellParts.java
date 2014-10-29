@@ -1,6 +1,7 @@
 package dastvisualizer;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 
 import javax.swing.JLabel;
@@ -12,12 +13,13 @@ public class CellParts extends JLabel{
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private int CellWidth ;
-	private int CellLength;
+	//private int CellWidth ;
+	//private int CellLength;
 
 	CellParts(String str, Color bg){
 		super(str);
 		setBackground(bg);
+		setFont(new Font("Arial", Font.PLAIN, 12));
 		LineBorder border = new LineBorder(Color.BLACK);
 		setOpaque(true);
 		setBorder(border);
@@ -26,6 +28,7 @@ public class CellParts extends JLabel{
 	
 	CellParts(String str){
 		super(str);
+		setFont(new Font("Arial", Font.PLAIN, 12));
 		LineBorder border = new LineBorder(Color.BLACK);
 		setOpaque(true);
 		setBorder(border);
@@ -37,5 +40,6 @@ public class CellParts extends JLabel{
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
 	}
+	
 
 }

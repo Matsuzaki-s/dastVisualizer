@@ -13,9 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.sun.jdi.ArrayType;
+import com.sun.jdi.BooleanType;
 import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.ClassObjectReference;
 import com.sun.jdi.ClassType;
+import com.sun.jdi.DoubleType;
 import com.sun.jdi.Field;
 import com.sun.jdi.IntegerType;
 import com.sun.jdi.IntegerValue;
@@ -166,10 +168,15 @@ public class ObjectInfo {
 	}*/
 
 	public void setAnotherField(Field field, Value value){
+		//System.out.println(field.typeName());
 		try {
 			if(field.type() instanceof IntegerType){
 				anotherField.put("int " + field.name(), ((IntegerValue)value).value());
-			}else if(value instanceof StringReference){
+			}else if(field.type() instanceof DoubleType){
+				anotherField.put("double " + field.name(), value);
+			}else if(field.type() instanceof BooleanType){
+				anotherField.put("boolean " + field.name(), value);
+			}else if(field.typeName().equals("java.lang.String")){
 				anotherField.put("String " + field.name(), value);
 			}else if(value instanceof ObjectReference){
 				if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
