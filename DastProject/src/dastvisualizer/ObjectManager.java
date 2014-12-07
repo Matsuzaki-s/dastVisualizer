@@ -28,43 +28,12 @@ public class ObjectManager {
 	private ReadDAST rf;
 	private Visualize visualize;
 
-	/*public ObjectManager(List<ReferenceType> tar, ReadFile rf){
-		this.rf = rf; 
-		for(Iterator<ReferenceType> it = tar.iterator(); it.hasNext();){
-			ReferenceType rtype = (ReferenceType)it.next();	
-			
-			for(Iterator<ObjectReference> ite = rtype.instances(0).iterator(); ite.hasNext();){
-				ObjectReference OR = (ObjectReference) ite.next();
-				System.out.println(OR.toString());
-			}
-				
-			
-			targetObject.addAll(rtype.instances(0));
-			
-	    	
-		}
-		
-		for(Iterator<ObjectReference> it = targetObject.iterator();it.hasNext(); ){
-    		System.out.println(it.next());
-    	}
-		
-		insert();
-		setLink();
-		new Set(objectInfo);
-		new Visualize(objectInfo);
-	}*/
+	
 	
 	public ObjectManager(List<ClassDefinition> cld){
 		targetClass = cld;
 	}
 	
-	/*private void insert(){
-		for(Iterator<ObjectReference> it = targetObject.iterator(); it.hasNext();){
-			ObjectReference oref = (ObjectReference)it.next();
-			objectInfo.add(new ObjectInfo(oref, rf, this));
-
-		}
-	}*/
 	
 	public void setLink(){
 		if(objectInfo.size() > 0){
@@ -84,17 +53,13 @@ public class ObjectManager {
 	}
 	
 	public ObjectInfo searchObjectInfo(ObjectReference tar){
-		//System.out.println();
-		//System.out.println("search " + tar);
 		for(Iterator<ObjectInfo> it = objectInfo.iterator(); it.hasNext();){
 			ObjectInfo oin = it.next();
 			
 			if(tar != null && oin.sameObject(tar)){
-				//System.out.println("return " +oin);
 				return oin;
 			}
 		}
-		//System.out.println("return null");
 		return null;
 	}
 	
@@ -102,9 +67,6 @@ public class ObjectManager {
 		paramReset();
 		if(objectInfo.size() > 0){
 		List<ObjectInfo> tar = objectInfo;
-
-		//System.out.println();
-		
 		if(visualize == null){
 			setLink();
 			set(tar);
@@ -130,7 +92,6 @@ public class ObjectManager {
 	public void set(List<ObjectInfo> tar) {	
 		for(Iterator<ObjectInfo> it = tar.iterator(); it.hasNext();){
 			ObjectInfo oin = it.next();
-			//System.out.println(oin.object + " isLinked:" + oin.isLinked() + " hasLink:" + oin.hasLink());
 			if(oin.isLinked() == false && oin.hasLink() == true){
 				oin.calculateSize();
 				oin.setPosion();

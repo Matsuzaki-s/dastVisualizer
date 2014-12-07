@@ -2,6 +2,7 @@ package dastvisualizer;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -327,18 +328,41 @@ public class ObjectInfo {
 	
 	public void calculateSize(){
 		calculated = true;
-		//ownLength += anotherField.size();
 		around_size[cent_length] = ownLength; 
-		for(int i = 5; i <= 7; i++){
-			if(around[i] != null && around[i].calculated == false) {
-				around[i].calculateSize();
-				if(around_size[down_length] <= around[i].getLength()){
-					around_size[down_length] = around[i].getLength();
-					
+		LinkedHashMap<String, Integer> fields = def.getFields();
+		
+		for(Iterator<Integer> it = fields.values().iterator(); it.hasNext();){
+			int direction = it.next();
+			if (direction >= 0 && direction <= 2) {
+				if (around[direction] != null && around[direction].calculated == false) {
+					around[direction].calculateSize();
+					if (around_size[up_length] <= around[direction].getLength()) {
+						around_size[up_length] = around[direction].getLength();
+					}
+					around_size[direction + 3] += around[direction].getWidth();
 				}
-				around_size[i + 3] += around[i].getWidth();
 			}
-		}
+			
+			if(direction >= 5 && direction <= 7){
+				if(around[direction] != null && around[direction].calculated == false) {
+					around[direction].calculateSize();
+					if(around_size[down_length] <= around[direction].getLength()){
+						around_size[down_length] = around[direction].getLength();
+					}
+					around_size[direction + 3] += around[direction].getWidth();
+				}
+			}
+			if(direction == 3 || direction == 4) {
+				if (around[direction] != null && around[direction].calculated == false) {
+					around[direction].calculateSize();
+					if (around_size[cent_length] < around[direction].getLength()) {
+						around_size[cent_length] = around[direction].getLength();
+						
+					}
+					around_size[direction + 3] = around[direction].getWidth();
+				}
+			}
+		}	
 		
 		if(getAroundArray()[5] != null || getAroundArray()[6] != null || getAroundArray()[7] != null){
 			around_size[down_length] ++;
@@ -347,35 +371,12 @@ public class ObjectInfo {
 		if((around[5] != null || around[7] != null) &&around[6] == null){
 			around_size[down_cent_width] += 1;
 		}
-			
-		for(int i = 4; i >= 3; i--) {
-			
-			if (around[i] != null && around[i].calculated == false) {
-				around[i].calculateSize();
-				if (around_size[cent_length] < around[i].getLength()) {
-					around_size[cent_length] = around[i].getLength();
-					
-				}
-				around_size[i + 3] = around[i].getWidth();
-			}
-		}
 		
 		if(getAroundArray()[3] != null){
 			around_size[cent_left_width]++;
 		}
 		if(getAroundArray()[4] != null){
 			around_size[cent_right_width]++;
-		}
-		
-		for (int i = 0; i <= 2; i++) {
-			if (around[i] != null && around[i].calculated == false) {
-				around[i].calculateSize();
-				if (around_size[up_length] <= around[i].getLength()) {
-					around_size[up_length] = around[i].getLength();
-				}
-				around_size[i + 3] += around[i].getWidth();
-
-			}
 		}
 		
 		if(getAroundArray()[0] != null || getAroundArray()[1] != null || getAroundArray()[2] != null){
@@ -475,184 +476,174 @@ public class ObjectInfo {
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
-		System.out.println();
-		*/
+		System.out.println();*/
 		
-		if(around[5] != null){
-			int cw = 0;
-			int with = 0;
-			if(aroundArray[5] != null){
-				with  = 1;
-			}
-			if(around[1] != null){
-				cw = around[1].getLeftHalf();
-			}
-			if(around[6] != null && around[6].getLeftHalf() > cw){
-				cw = around[6].getLeftHalf();
-			}
-			if(around[3] == null){
-				around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength + with);
-			}else{
-				around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength + with);
-			}
-			
-			if(aroundArray[5] != null){
-				aroundArray[5].setPxy(around[5].getPx(), py + 1);
-			}
-		}
+		LinkedHashMap<String, Integer> fields = def.getFields();
 		
-		if(around[6] != null){
-			int with = 0;
-			if(aroundArray[6] != null){
-				with = 1;
-			}
-			around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength + with);
-			
-			if(aroundArray[6] != null){
-				aroundArray[6].setPxy(around[6].getPx(), py + 1);
+		for(Iterator<Integer> it = fields.values().iterator(); it.hasNext();){
+			int direction = it.next();
+			if(around[direction] != null){
+				if(direction == 0){
+					int cw = 0;
+					int with = 0;
+					if(aroundArray[0] != null){
+						with = 1;
+					}
+					if(around[1] != null){
+						cw = around[1].getLeftHalf();
+					}
+					if(around[6] != null && around[6].getLeftHalf() > cw){
+						cw = around[6].getLeftHalf();
+					}
+					if(around[3] == null){
+						around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength() - with);
+					}else{
+						around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf() - with);
+					}
+					if(aroundArray[0] != null){
+						aroundArray[0].setPxy(around[0].getPx(), py + 1);
+					
+					}
+				}
 				
-			}
-			
-		}
-		
-		if(around[7] != null){
-			int cw = 0;
-			int with = 0;
-			if(aroundArray[7] != null){
-				with = 1;
-			}
-			
-			if(around[1] != null){
-				cw = around[1].getRightHalf();
-			}
-			if(around[6] != null && around[6].getRightHalf() > cw){
-				cw = around[6].getRightHalf();
-			}
-			
-			if(around[4] == null){
-				around[7].setPosion( px + 1 + cw, py + ownLength + with);
-			}else{
-				around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength + with);
-			}
-			
-			if(aroundArray[7] != null){
-				aroundArray[7].setPxy(around[7].getPx(), py + 1);
-			
-			}
-		}
-		
-		
-		if(around[4] != null){
-			int cw = 0;
-			int with = 0;
-			if(aroundArray[4] != null){
-				with = 1;
-			}
-			
-			if(around[1] != null && around[4].up_half > 0){
-				cw = around[1].getRightHalf();
-			}
-			if(around[6] != null && around[6].getRightHalf() > cw && around[4].bottom_half > 0){
-				cw = around[6].getRightHalf();
-			}
-			
-			//cw = 0; //一時様子見
-			around[4].setPosion(px + 1 + cw + with, py - around[4].getUpHalf());
-			
-			if(aroundArray[4] != null){
-				aroundArray[4].setPxy(px + 1, around[4].getPy());
+				if(direction == 1){
+					int with = 0;
+					if(aroundArray[1] != null){
+						with = 1;
+					}
+					around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength() - with);
+					if(aroundArray[1] != null){
+						aroundArray[1].setPxy(around[1].getPx(), py - 1);
+					
+					}
+				}
 				
-			}
-		}
-		if(around[3] != null){
-			int with = 0;
-			if(aroundArray[3] != null){
-				with = 1;
-			}
-			int cw = 0;
-			if(around[1] != null && around[3].up_half > 0){
-				cw = around[1].getLeftHalf();
-			}
-			if(around[6] != null && around[6].getLeftHalf() > cw && around[3].bottom_half > 0 ){
-				cw = around[6].getLeftHalf();
-			}
-			
-			//cw = 0; //上と同じく
-			
-			
-			
-			
-		if(aroundArray[3] != null){
-				around[3].setPosion(px - around[3].getWidth() - cw - with, py - around[3].getUpHalf());
+				if(direction == 2){
+					int cw = 0;
+					int with = 0;
+					if(aroundArray[2] != null){
+						with = 1;
+					}
+					if(around[1] != null){
+						cw = around[1].getRightHalf();
+					}
+					if(around[6] != null && around[6].getRightHalf() > cw){
+						cw = around[6].getRightHalf();
+					}
+					if(around[4] == null){
+						around[2].setPosion(px + 1 + cw, py - around[2].getLength() - with);
+					}else{
+						around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength()-with);
+					}
+					if(aroundArray[2] != null){
+						aroundArray[2].setPxy(around[2].getPx(), py - 1);
+					}
+				}
 				
-							
-				aroundArray[3].setPxy(px - 1 , around[3].getPy());
-			}else{	
-				around[3].setPosion(px - around[3].getWidth() - cw, py - around[3].getUpHalf());	
+				if(direction == 3){
+					int with = 0;
+					if(aroundArray[3] != null){
+						with = 1;
+					}
+					int cw = 0;
+					if(around[1] != null && around[3].up_half > 0){
+						cw = around[1].getLeftHalf();
+					}
+					if(around[6] != null && around[6].getLeftHalf() > cw){
+						cw = around[6].getLeftHalf();
+					}		
+					if(aroundArray[3] != null){
+						around[3].setPosion(px - around[3].getWidth() - cw - with, py - around[3].getUpHalf());			
+						aroundArray[3].setPxy(px - 1 , around[3].getPy());
+					}else{	
+						around[3].setPosion(px - around[3].getWidth() - cw, py - around[3].getUpHalf());	
+					}
+				}
+				
+				if(direction == 4){
+					int cw = 0;
+					int with = 0;
+					if(aroundArray[4] != null){
+						with = 1;
+					}
+					
+					if(around[1] != null && around[4].up_half > 0){
+						cw = around[1].getRightHalf();
+					}
+					if(around[6] != null && around[6].getRightHalf() > cw && around[4].bottom_half > 0){
+						cw = around[6].getRightHalf();
+					}
+					//cw = 0; //一時様子見
+					around[4].setPosion(px + 1 + cw + with, py - around[4].getUpHalf());
+					
+					if(aroundArray[4] != null){
+						aroundArray[4].setPxy(px + 1, around[4].getPy());	
+					}
+				}
+				
+				if(direction == 5){
+					int cw = 0;
+					int with = 0;
+					if(aroundArray[5] != null){
+						with  = 1;
+					}
+					if(around[1] != null){
+						cw = around[1].getLeftHalf();
+					}
+					if(around[6] != null && around[6].getLeftHalf() > cw){
+						cw = around[6].getLeftHalf();
+					}
+					if(around[3] == null){
+						around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength + with);
+					}else{
+						around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength + with);
+					}
+					
+					if(aroundArray[5] != null){
+						aroundArray[5].setPxy(around[5].getPx(), py + 1);
+					}
+				}
+				
+				if(direction == 6){
+					int with = 0;
+					if(aroundArray[6] != null){
+						with = 1;
+					}
+					around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength + with);
+					
+					if(aroundArray[6] != null){
+						aroundArray[6].setPxy(around[6].getPx(), py + 1);
+						
+					}	
+				}
+				
+				if(direction == 7){
+					int cw = 0;
+					int with = 0;
+					if(aroundArray[7] != null){
+						with = 1;
+					}
+					
+					if(around[1] != null){
+						cw = around[1].getRightHalf();
+					}
+					if(around[6] != null && around[6].getRightHalf() > cw){
+						cw = around[6].getRightHalf();
+					}
+					
+					if(around[4] == null){
+						around[7].setPosion( px + 1 + cw, py + ownLength + with);
+					}else{
+						around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength + with);
+					}
+					
+					if(aroundArray[7] != null){
+						aroundArray[7].setPxy(around[7].getPx(), py + 1);
+					
+					}
+				}
 			}
-		}
-		
-		
-
-		
-		if(around[2] != null){
-			int cw = 0;
-			int with = 0;
-			if(aroundArray[2] != null){
-				with = 1;
-			}
-			if(around[1] != null){
-				cw = around[1].getRightHalf();
-			}
-			if(around[6] != null && around[6].getRightHalf() > cw){
-				cw = around[6].getRightHalf();
-			}
-			if(around[4] == null){
-				around[2].setPosion(px + 1 + cw, py - around[2].getLength() - with);
-			}else{
-				around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength()-with);
-			}
-			if(aroundArray[2] != null){
-				aroundArray[2].setPxy(around[2].getPx(), py - 1);
-			}
-		}
-		
-		if(around[1] != null){
-			int with = 0;
-			if(aroundArray[1] != null){
-				with = 1;
-			}
-			around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength() - with);
-			if(aroundArray[1] != null){
-				aroundArray[1].setPxy(around[1].getPx(), py - 1);
-			
-			}
-		}
-		
-		
-		if(around[0] != null){
-			int cw = 0;
-			int with = 0;
-			if(aroundArray[0] != null){
-				with = 1;
-			}
-			if(around[1] != null){
-				cw = around[1].getLeftHalf();
-			}
-			if(around[6] != null && around[6].getLeftHalf() > cw){
-				cw = around[6].getLeftHalf();
-			}
-			if(around[3] == null){
-				around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength() - with);
-			}else{
-				around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf() - with);
-			}
-			if(aroundArray[0] != null){
-				aroundArray[0].setPxy(around[0].getPx(), py + 1);
-			
-			}
-		}
-		
+		}		
 	}
 
 	public int getLength() {

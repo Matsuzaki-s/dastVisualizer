@@ -1,8 +1,9 @@
 package dastvisualizer;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.sun.tools.jdi.LinkedHashMap;
+
 
 
 
@@ -10,7 +11,7 @@ public class ClassDefinition {
 	private String name;
 	private int numField = 0;
 	private int numObject = 0;
-	private Map<String, Integer> fieldDirection = new LinkedHashMap(); 
+	private LinkedHashMap<String, Integer> fieldDirection = new LinkedHashMap(); 
 	
 	ClassDefinition(String name){
 		this.name = name;
@@ -80,7 +81,7 @@ public class ClassDefinition {
 		return name;
 	}
 	
-	public Map<String, Integer> getFields(){
+	public LinkedHashMap<String, Integer> getFields(){
 		return fieldDirection;
 	}
 	
