@@ -8,6 +8,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -30,7 +31,7 @@ public class Visualize extends JFrame{
 	private BasePane panel;
 	private JScrollPane mainPanel;
 	private List<JScrollPane> panelList = new ArrayList<JScrollPane>();
-	//private List<ObjectInfo> lastCellList;
+	private List<ObjectInfo> lastCellList;
 
 	Visualize(List<ObjectInfo> cell){
 		this.setSize(900, 1000);
@@ -40,8 +41,14 @@ public class Visualize extends JFrame{
 		
 		//this.setLayout(null);
 		
+		/*for(Iterator<ObjectInfo> it = cell.iterator(); it.hasNext();){
+			ObjectInfo oi = it.next();
+			System.out.println(oi);
+		}
+		System.out.println("--");*/
+		
 		panel = new BasePane(cell, this);
-		//lastCellList = cell;
+		lastCellList = cell;
 		JScrollPane scrollpane = new JScrollPane(panel);
 		
 		contentPane = getContentPane();
@@ -70,6 +77,12 @@ public class Visualize extends JFrame{
 	}
 	
 	public void reDraw(List<ObjectInfo> cell){
+		/*for(Iterator<ObjectInfo> it = cell.iterator(); it.hasNext();){
+			ObjectInfo oi = it.next();
+			System.out.println(oi);
+		}
+		System.out.println("--");*/
+		
 		panel = new BasePane(cell, this);
 		JScrollPane scrollpane = new JScrollPane(panel);
 		

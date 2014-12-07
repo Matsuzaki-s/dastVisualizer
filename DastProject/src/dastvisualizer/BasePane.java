@@ -63,14 +63,13 @@ public class BasePane extends JLayeredPane implements ActionListener{
 	private void setPanel(List<ObjectInfo> tar){
 		this.targetObject = tar;
 		cellpanel.clear();
-		
+
 		for(Iterator<ObjectInfo> it = tar.iterator(); it.hasNext();){
 			ObjectInfo oin = (ObjectInfo)it.next();
 			//System.out.println(oin.object.toString());
 			//System.out.println(oin.isLinked() + " "+ oin.hasLink());
 			if((oin.isLinked() == true || oin.hasLink() == true) && oin.set == true){
 				cellpanel.put(oin ,new CellPanel(oin));
-				
 				if(cellpanel.get(oin).getPreferredSize().width > CellWidth && oin.isArray() == false){
 					CellWidth = cellpanel.get(oin).getPreferredSize().width;
 				}

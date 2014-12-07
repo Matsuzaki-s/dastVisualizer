@@ -94,6 +94,9 @@ public class ObjectInfo {
 		}
 		this.copy = false;
 		
+		//System.out.println("make " + tar);
+
+		
 	}
 	
 	ObjectInfo(ObjectInfo source){
@@ -133,6 +136,7 @@ public class ObjectInfo {
 			}else if(direction != null && direction <= 7 && aroundFieldName[direction] != null && aroundFieldName[direction] != tar.name() &&  getAroundArrayName()[direction] == null){
 				getAroundArrayName()[direction] = tar.name();
 			}else{
+				//System.out.println("ANOther:"+tar.name());
 				setAnotherField(tar, object.getValue(tar));
 			}
 		}
@@ -178,11 +182,14 @@ public class ObjectInfo {
 				anotherField.put("boolean " + field.name(), value);
 			}else if(field.typeName().equals("java.lang.String")){
 				anotherField.put("String " + field.name(), value);
+			}else if(field.typeName().equals("java.lang.Object")){
+				anotherField.put("Object " + field.name(), value);
 			}else if(value instanceof ObjectReference){
 				if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
 					anotherField.put("Integer " + field.name(),  (ObjectReference)value);
-					}
+				}
 			}
+				
 		} catch (ClassNotLoadedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -212,23 +219,31 @@ public class ObjectInfo {
 			System.out.println(entry.getKey() + " " + entry.getValue());
 		}*/
 		
+		//System.out.println("--");
+		
 		for(Iterator<Field> it = fields.iterator(); it.hasNext(); ){
 			Field field = (Field)it.next();
 			Integer direction = fieldDirection.get(field.name());
 			if(direction == null){
 				 direction = fieldDirection.get(field.name() + "[]");
 			}
+			//System.out.println(object + " field:" + field.name() + " direction" + direction);
+			
 			if(direction != null && object.getValue(field) != null){
 				if(around[direction] == null){
+					//System.out.println(field.name() +" search " + (ObjectReference)object.getValue(field));
 					around[direction] = om.searchObjectInfo((ObjectReference)object.getValue(field));
 					if(field.name() != aroundFieldName[direction]){
 						String copy = getAroundArrayName()[direction];
 						getAroundArrayName()[direction] = aroundFieldName[direction];
 						aroundFieldName[direction] = copy;							
 					}
+					//System.out.println(around[direction]);
+					
 				}else{
+					//System.out.println(field.name() +" search " + (ObjectReference)object.getValue(field));
 					ObjectInfo obim = om.searchObjectInfo((ObjectReference)object.getValue(field));
-					if(obim!= null && obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
+					if(obim != null && obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
 						getAroundArray()[direction] = (ArrayInfo)obim;
 						if(field.name() != getAroundArrayName()[direction]){
 							String copy = getAroundArrayName()[direction];
@@ -253,6 +268,8 @@ public class ObjectInfo {
 					getAroundArray()[direction].Linked();
 					this.Link();
 				}
+			}else if(direction != null && object.getValue(field) == null){
+				around[direction] = null;
 			}
 		}
 	}
@@ -268,7 +285,7 @@ public class ObjectInfo {
 	}
 	
 	public boolean sameObject(ObjectReference tar){
-		//System.out.println(tar +" "+object);
+		//System.out.println("find " + object);
 		return tar.equals(object);
 	}
 	
@@ -307,17 +324,6 @@ public class ObjectInfo {
 		
 	*/
 	
-	/*public void reset(){
-		set = false;
-		calculated = false;
-		linked = false;
-		link = false;
-		px = 0;
-		py = 0;
-		
-		//resetAround();
-		
-	}*/
 	
 	public void calculateSize(){
 		calculated = true;
@@ -464,11 +470,13 @@ public class ObjectInfo {
 		
 		//ReadFile.setMap(this);
 		}
-		/*System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
+		/*System.out.println("--");
+		System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
-		System.out.println();*/
+		System.out.println();
+		*/
 		
 		if(around[5] != null){
 			int cw = 0;
@@ -793,6 +801,38 @@ public class ObjectInfo {
 
 	public void setAroundArray(ArrayInfo[] aroundArray) {
 		this.aroundArray = aroundArray;
+	}
+	
+	public void reset(){
+		set = false;
+		calculated = false;
+		linked = false;
+		link = false;
+		
+		for(int i = 0; i < 8; i++){
+			around[i] = null;
+			aroundArray[i] = null;
+		}
+		
+		
+		for(int i = 0; i < around_size.length; i++){
+			if(i == 1){
+				around_size[i] = 1;
+			}else{
+				around_size[i] = 0;
+			}
+		}
+		with = -1;
+		width = 0;
+		length = 0;
+		ownLength = 1;
+		up_half = 0;
+		bottom_half = 0;
+		left_half= 0;
+		right_half = 0;
+	 	
+		px = 0;
+		py = 0;
 	}
 
 	

@@ -410,10 +410,10 @@ public class ArrayInfo extends ObjectInfo{
 		py = uly + getUpHalf();
 		}
 		
-		/*System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
+		System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
-		System.out.println("width:" + getWidth() + " length:" + getLength());*/
+		System.out.println("width:" + getWidth() + " length:" + getLength());
 	}
 	boolean checkObject(Object obj){
 		return checkArray(obj);
@@ -541,6 +541,18 @@ public class ArrayInfo extends ObjectInfo{
 			}
 		}
 		return false;
+	}
+	
+	public void reset(){
+		super.reset();
+	    width = 0;
+		length = 0;
+		ownLength = 1;
+		ownWidth = 1;
+		up_half = 0;
+		bottom_half = 0;
+		left_half = 0;
+		right_half = 0;
 	}
 	
 	
