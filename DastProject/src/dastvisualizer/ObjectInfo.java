@@ -1,5 +1,6 @@
 package dastvisualizer;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -59,13 +60,16 @@ public class ObjectInfo {
 	private boolean link = false;
 	
 	private ObjectInfo[] around = new ObjectInfo[8];
+	private HashMap<String,ObjectInfo> another = new HashMap<String, ObjectInfo>();
 	
-	public boolean copy;
+	public boolean copy = false;
+	public boolean copied = false;
 	
 	private ArrayInfo[] aroundArray = new ArrayInfo[8]; 
 	private String[] aroundArrayName = new String[8];
 	private int with = -1;
 	private String[] aroundFieldName = new String[8];
+	private int[] aroundTime = new int[8];
 	private Map<String, Object> anotherField = new HashMap<String,Object>();
 	private int around_size[]  = { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	private int width = 0;
@@ -75,14 +79,19 @@ public class ObjectInfo {
 	private int bottom_half = 0;
 	private int left_half= 0;
 	private int right_half = 0;
- 	
+
 	protected int px;
 	protected int py;
+	
+	protected int time=0;
+	protected int h;
 
-	//’Ç‰Á•ª
 	protected ObjectManager om;
 	private int i;
 	private String primitiveType;
+	private ObjectInfo lastLinked;
+	private int headPoint = 0;
+	
 	
 	ObjectInfo(ObjectReference tar,Type type, ClassDefinition def, ObjectManager om){
 		object = tar;
@@ -109,7 +118,8 @@ public class ObjectInfo {
 		this.copy = true;
 		this.aroundFieldName = source.aroundFieldName;
 		this.anotherField = source.anotherField;
-
+		this.linked = source.isLinked();
+		om.addObject(this);
 		
 	}
 	
@@ -136,44 +146,16 @@ public class ObjectInfo {
 				aroundFieldName[direction] = tar.name();
 			}else if(direction != null && direction <= 7 && aroundFieldName[direction] != null && aroundFieldName[direction] != tar.name() &&  getAroundArrayName()[direction] == null){
 				getAroundArrayName()[direction] = tar.name();
+			}else if(direction != null && direction == 8){
+				another.put(tar.name(),null);
 			}else{
-				//System.out.println("ANOther:"+tar.name());
 				setAnotherField(tar, object.getValue(tar));
 			}
 		}
 	}
-	
-	/*public void changeField(ModificationWatchpointEvent event){
-		ObjectReference object = event.object();
-		Field field = event.field();
-		Value value = event.valueToBe();
-		Type type = null;
-		if(value != null){
-			type = value.type();
-		}
-			int direction = isAroundField(field);
-			if (direction >= 0) {
-				around[direction] = om.searchObjectInfo((ObjectReference) value);
-			} else {
-				setAnotherField(field, value);
-			}
-			
-		
-	}
-	
-	public void changeField(Field field, Value value) {
-		
-		int direction = isAroundField(field); 
-		if(direction >= 0){
-			around[direction] = om.searchObjectInfo((ObjectReference)value);
-		}else{
-			
-			setAnotherField(field, value);
-		}
-	}*/
+
 
 	public void setAnotherField(Field field, Value value){
-		//System.out.println(field.typeName());
 		try {
 			if(field.type() instanceof IntegerType){
 				anotherField.put("int " + field.name(), ((IntegerValue)value).value());
@@ -189,6 +171,8 @@ public class ObjectInfo {
 				if(((ObjectReference) value).referenceType().name().equals("java.lang.Integer")){
 					anotherField.put("Integer " + field.name(),  (ObjectReference)value);
 				}
+			}else{
+				anotherField.put(value.type().toString(), value);
 			}
 				
 		} catch (ClassNotLoadedException e) {
@@ -211,38 +195,80 @@ public class ObjectInfo {
 		return -1;
 	}
 	
-	public void setLink() throws IllegalArgumentException, IllegalAccessException{
-		List<Field> fields = object.referenceType().fields();
+	public void setLink(int time, Field field) throws IllegalArgumentException, IllegalAccessException{
 		Map<String, Integer> fieldDirection = def.getFields();
-		
-		/*for(Iterator it = fieldDirection.entrySet().iterator(); it.hasNext();){
-			Map.Entry<String, Integer> entry = (Entry<String, Integer>) it.next();
-			System.out.println(entry.getKey() + " " + entry.getValue());
-		}*/
-		
-		//System.out.println("--");
-		
-		for(Iterator<Field> it = fields.iterator(); it.hasNext(); ){
-			Field field = (Field)it.next();
 			Integer direction = fieldDirection.get(field.name());
 			if(direction == null){
 				 direction = fieldDirection.get(field.name() + "[]");
 			}
-			//System.out.println(object + " field:" + field.name() + " direction" + direction);
-			
+			if(direction != null && object.getValue(field) != null){
+				ObjectInfo obin = om.searchObjectInfo((ObjectReference)object.getValue(field));
+				if(direction <= 7 && obin!=null && obin != around[direction]){
+					aroundTime[direction] = time;
+				}
+				if(direction <= 7 && around[direction] == null){
+					around[direction] = obin;
+					if(field.name() != aroundFieldName[direction]){
+						String copy = getAroundArrayName()[direction];
+						getAroundArrayName()[direction] = aroundFieldName[direction];
+						aroundFieldName[direction] = copy;							
+					}
+				}else if(direction == 8){
+					another.put(field.name(), obin);
+				}else{
+					if(obin != null && obin.isArray() == false){
+						if(direction <= 7){
+							around[direction] = obin;
+						}else{
+							another.put(field.name(),  obin);
+						}
+					}else if(obin != null && obin.isArray() && ((ArrayInfo)obin).isPrimitive()){
+						getAroundArray()[direction] = (ArrayInfo)obin;
+						if(field.name() != getAroundArrayName()[direction]){
+							String copy = getAroundArrayName()[direction];
+							getAroundArrayName()[direction] = aroundFieldName[direction];
+							aroundFieldName[direction] = copy;							
+						}
+					}else if(around[direction].isArray() && ((ArrayInfo)around[direction]).isPrimitive()){
+						getAroundArray()[direction] = (ArrayInfo)around[direction];
+						around[direction] = obin;
+						if(field.name() != aroundFieldName[direction]){
+							String copy = getAroundArrayName()[direction];
+							getAroundArrayName()[direction] = aroundFieldName[direction];
+							aroundFieldName[direction] = copy;							
+						}
+					}
+				}
+				if(direction <= 7 && around[direction] != null){
+					around[direction].Linked(this);
+					this.Link();
+				}
+				if(direction <= 7 && getAroundArray()[direction] != null){
+					getAroundArray()[direction].Linked(this);
+					this.Link();
+				}
+			}else if(direction != null && direction <= 7 && object.getValue(field) == null){
+				around[direction] = null;
+			}
+	}
+	/*public void setLink(Field field) throws IllegalArgumentException, IllegalAccessException{
+		//List<Field> fields = object.referenceType().fields();
+		Map<String, Integer> fieldDirection = def.getFields();
+		//for(Iterator<Field> it = fields.iterator(); it.hasNext(); ){
+			//Field field = (Field)it.next();
+			Integer direction = fieldDirection.get(field.name());
+			if(direction == null){
+				 direction = fieldDirection.get(field.name() + "[]");
+			}
 			if(direction != null && object.getValue(field) != null){
 				if(around[direction] == null){
-					//System.out.println(field.name() +" search " + (ObjectReference)object.getValue(field));
 					around[direction] = om.searchObjectInfo((ObjectReference)object.getValue(field));
 					if(field.name() != aroundFieldName[direction]){
 						String copy = getAroundArrayName()[direction];
 						getAroundArrayName()[direction] = aroundFieldName[direction];
 						aroundFieldName[direction] = copy;							
 					}
-					//System.out.println(around[direction]);
-					
 				}else{
-					//System.out.println(field.name() +" search " + (ObjectReference)object.getValue(field));
 					ObjectInfo obim = om.searchObjectInfo((ObjectReference)object.getValue(field));
 					if(obim != null && obim.isArray() && ((ArrayInfo)obim).isPrimitive()){
 						getAroundArray()[direction] = (ArrayInfo)obim;
@@ -272,8 +298,8 @@ public class ObjectInfo {
 			}else if(direction != null && object.getValue(field) == null){
 				around[direction] = null;
 			}
-		}
-	}
+		//}
+	}*/
 		
 	
 	
@@ -286,47 +312,16 @@ public class ObjectInfo {
 	}
 	
 	public boolean sameObject(ObjectReference tar){
-		//System.out.println("find " + object);
 		return tar.equals(object);
+	}	
+	
+	public int calculateSize(int totalHeight){
+		calculateSize();
+		headPoint = totalHeight;
+		return this.length;
 	}
-	
-	/*void setArray(String name,Object[] a){
-		ClassDefinition.Value v = type.SearchValue(name + "[]");
-		if(v != null){
-			if(around[v.direction]== null){
-			around[v.direction] = new MyArray(this, a, v.direction, v.name);
-			this.Link();
-			}else{
-				if(around[v.direction].isArray() && a.getClass().getSimpleName().equals("Integer[]") == false){
-					aroundArray[v.direction] = (MyArray)around[v.direction];
-					around[v.direction] = new MyArray(this, a, v.direction, v.name);
-					aroundFieldName[v.direction] = v.name;
-				}else{
-					aroundArray[v.direction] = new MyArray(this, a, v.direction, v.name);
-				}
-				around[v.direction].setWith(v.direction);
-			}
-		}
-		
-	}
-	
-	void setArray(String name,int[] a){
-		ClassDefinition.Value v = type.SearchValue(name + "[]");
-		if(v != null){
-			if(around[v.direction]== null){
-			around[v.direction] = new MyPrimitiveArray(this, a, v.direction, v.name);
-			this.Link();
-			}else{
-					aroundArray[v.direction] = new MyPrimitiveArray(this, a, v.direction, v.name);
-			}
-				around[v.direction].setWith(v.direction);
-		}
-	}
-		
-	*/
-	
-	
 	public void calculateSize(){
+
 		calculated = true;
 		around_size[cent_length] = ownLength; 
 		LinkedHashMap<String, Integer> fields = def.getFields();
@@ -334,8 +329,13 @@ public class ObjectInfo {
 		for(Iterator<Integer> it = fields.values().iterator(); it.hasNext();){
 			int direction = it.next();
 			if (direction >= 0 && direction <= 2) {
-				if (around[direction] != null && around[direction].calculated == false) {
+				if (around[direction] != null && around[direction].calculated == false ) {
 					around[direction].calculateSize();
+					if (around_size[up_length] <= around[direction].getLength()) {
+						around_size[up_length] = around[direction].getLength();
+					}
+					around_size[direction + 3] += around[direction].getWidth();
+				}else if(around[direction] != null && around[direction].getTime() < aroundTime[direction]){
 					if (around_size[up_length] <= around[direction].getLength()) {
 						around_size[up_length] = around[direction].getLength();
 					}
@@ -350,17 +350,30 @@ public class ObjectInfo {
 						around_size[down_length] = around[direction].getLength();
 					}
 					around_size[direction + 3] += around[direction].getWidth();
+				}else if(around[direction] != null && around[direction].getTime() < aroundTime[direction]){
+					if(around_size[down_length] <= around[direction].getLength()){
+						around_size[down_length] = around[direction].getLength();
+					}
+					around_size[direction + 3] += around[direction].getWidth();
 				}
+					
 			}
 			if(direction == 3 || direction == 4) {
 				if (around[direction] != null && around[direction].calculated == false) {
 					around[direction].calculateSize();
 					if (around_size[cent_length] < around[direction].getLength()) {
 						around_size[cent_length] = around[direction].getLength();
-						
+					}
+					around_size[direction + 3] = around[direction].getWidth();
+				}else if(around[direction] != null && around[direction].getTime() < aroundTime[direction]){
+					if (around_size[cent_length] < around[direction].getLength()) {
+						around_size[cent_length] = around[direction].getLength();
 					}
 					around_size[direction + 3] = around[direction].getWidth();
 				}
+			}
+			if(direction <= 7 && around[direction] != null){
+				around[direction].setTime(aroundTime[direction]);
 			}
 		}	
 		
@@ -439,50 +452,104 @@ public class ObjectInfo {
 
 }
 	
-	void setPosion(){
-		setPosion(0, 0);
+	int setPosion(int totalHeight){
+		ArrayList<ObjectInfo> parent = new ArrayList<ObjectInfo>(); 
+		setPosion(0, totalHeight, 0,0,parent);
+		return length;
 	}
 	
-	void setPosion(int ulx, int uly){
-		if(set == true){
+	
+	
+	void setPosion(int ulx, int uly,int time, int h, ArrayList<ObjectInfo> parent){
+		if(set == true && (this.time > time|| this.h <= 1 || parent.get(parent.size()-1).linked == false)){
 			return;
 		}
+		ArrayList<ObjectInfo> newParent = new ArrayList<ObjectInfo>(); 
+		for(Iterator<ObjectInfo> it = parent.iterator(); it.hasNext();){
+			ObjectInfo next = it.next();
+			if(next.equals(this)){
+				return;
+			}
+			newParent.add(next);
+		}
+		
+		newParent.add(this);
 		
 		set = true;
+		this.h = h;
 		
+		int x;
+		int y;
 		if(with >= 0){
 			if(0 <= with && with <= 2){
-				px = ulx + getLeftHalf();
-				py = uly + getUpHalf() - 1;
+				x = ulx + getLeftHalf();
+				y = uly + getUpHalf() - 1;
 			}else if(with == 3){
-				px = ulx + getLeftHalf();
-				py = uly + getUpHalf();
+				x = ulx + getLeftHalf();
+				y = uly + getUpHalf();
 			}else if(with == 4){
-				px = ulx + getLeftHalf() + 1;
-				py = uly + getUpHalf();
+				x = ulx + getLeftHalf() + 1;
+				y = uly + getUpHalf();
 			}else{
-				px = ulx + getLeftHalf();
-				py = uly + getUpHalf() + 1;
+				x = ulx + getLeftHalf();
+				y = uly + getUpHalf() + 1;
 			}
 		}else{
 
-		px = ulx + getLeftHalf();
-		py = uly + getUpHalf();
+		x = ulx + getLeftHalf();
+		y = uly + getUpHalf();
 		
-		//ReadFile.setMap(this);
+
 		}
+		List<ObjectInfo> list = om.getObjectInfo();
+		if((x < 0 || y < 0) && set){
+			return;
+		}else if((x < 0 || y < 0) && set != true){
+			while(x < 0){
+			for(Iterator<ObjectInfo> it = list.iterator(); it.hasNext();){
+				ObjectInfo obji = it.next();
+				if(obji == this){
+					x++;
+				}else{
+					obji.px++;
+				}
+			}
+			}
+			while(y < 0){
+				for(Iterator<ObjectInfo> it = list.iterator(); it.hasNext();){
+					ObjectInfo obji = it.next();
+					if(obji == this){
+						y++;
+					}else{
+						obji.py++;
+					}
+				}
+				}
+			
+		}
+		
+		/*for(Iterator<ObjectInfo> it = list.iterator(); it.hasNext();){
+			ObjectInfo obji = it.next();
+			if(obji.set == true && obji.getPx() == x && obji.getPy() == y && obji != this){
+				return;
+			}
+		}*/
+		
+		px = x;
+		py = y;
 		/*System.out.println("--");
 		System.out.println(type.name() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
 		System.out.println("width:" + getWidth() + " length:" + getLength());
-		System.out.println();*/
-		
+		System.out.println();
+		*/
+
 		LinkedHashMap<String, Integer> fields = def.getFields();
-		
+
 		for(Iterator<Integer> it = fields.values().iterator(); it.hasNext();){
 			int direction = it.next();
-			if(around[direction] != null){
+			if(direction <= 7 && around[direction] != null){
 				if(direction == 0){
 					int cw = 0;
 					int with = 0;
@@ -496,9 +563,9 @@ public class ObjectInfo {
 						cw = around[6].getLeftHalf();
 					}
 					if(around[3] == null){
-						around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength() - with);
+						around[0].setPosion(px - around[0].getWidth() - cw, py - around[0].getLength() - with,aroundTime[0], h + 1, newParent);
 					}else{
-						around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf() - with);
+						around[0].setPosion(px - around[0].getWidth() - cw , py - around[0].getLength() - around[3].getUpHalf() - with, aroundTime[0], h + 1, newParent);
 					}
 					if(aroundArray[0] != null){
 						aroundArray[0].setPxy(around[0].getPx(), py + 1);
@@ -511,7 +578,7 @@ public class ObjectInfo {
 					if(aroundArray[1] != null){
 						with = 1;
 					}
-					around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength() - with);
+					around[1].setPosion(px - around[1].getLeftHalf(), py - around[1].getLength() - with, aroundTime[1], h + 1, newParent);
 					if(aroundArray[1] != null){
 						aroundArray[1].setPxy(around[1].getPx(), py - 1);
 					
@@ -531,9 +598,9 @@ public class ObjectInfo {
 						cw = around[6].getRightHalf();
 					}
 					if(around[4] == null){
-						around[2].setPosion(px + 1 + cw, py - around[2].getLength() - with);
+						around[2].setPosion(px + 1 + cw, py - around[2].getLength() - with, aroundTime[2], h + 1, newParent);
 					}else{
-						around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength()-with);
+						around[2].setPosion(px + 1 + cw, py - around[4].getUpHalf() - around[2].getLength()-with, aroundTime[2], h + 1, newParent);
 					}
 					if(aroundArray[2] != null){
 						aroundArray[2].setPxy(around[2].getPx(), py - 1);
@@ -553,10 +620,10 @@ public class ObjectInfo {
 						cw = around[6].getLeftHalf();
 					}		
 					if(aroundArray[3] != null){
-						around[3].setPosion(px - around[3].getWidth() - cw - with, py - around[3].getUpHalf());			
+						around[3].setPosion(px - around[3].getWidth() - cw - with, py - around[3].getUpHalf(), aroundTime[3], h + 1, newParent);			
 						aroundArray[3].setPxy(px - 1 , around[3].getPy());
 					}else{	
-						around[3].setPosion(px - around[3].getWidth() - cw, py - around[3].getUpHalf());	
+						around[3].setPosion(px - around[3].getWidth() - cw, py - around[3].getUpHalf(), aroundTime[3], h + 1, newParent);	
 					}
 				}
 				
@@ -574,7 +641,7 @@ public class ObjectInfo {
 						cw = around[6].getRightHalf();
 					}
 					//cw = 0; //ˆêŽž—lŽqŒ©
-					around[4].setPosion(px + 1 + cw + with, py - around[4].getUpHalf());
+					around[4].setPosion(px + 1 + cw + with, py - around[4].getUpHalf(), aroundTime[4], h + 1, newParent);
 					
 					if(aroundArray[4] != null){
 						aroundArray[4].setPxy(px + 1, around[4].getPy());	
@@ -594,9 +661,9 @@ public class ObjectInfo {
 						cw = around[6].getLeftHalf();
 					}
 					if(around[3] == null){
-						around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength + with);
+						around[5].setPosion(px - around[5].getWidth() - cw, py + ownLength + with, aroundTime[5], h + 1, newParent);
 					}else{
-						around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength + with);
+						around[5].setPosion(px - around[5].getWidth() - cw, py + around[3].getBottomHalf() + ownLength + with, aroundTime[5], h + 1, newParent);
 					}
 					
 					if(aroundArray[5] != null){
@@ -609,7 +676,7 @@ public class ObjectInfo {
 					if(aroundArray[6] != null){
 						with = 1;
 					}
-					around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength + with);
+					around[6].setPosion(px - around[6].getLeftHalf() , py + ownLength + with, aroundTime[6], h + 1, newParent);
 					
 					if(aroundArray[6] != null){
 						aroundArray[6].setPxy(around[6].getPx(), py + 1);
@@ -632,9 +699,9 @@ public class ObjectInfo {
 					}
 					
 					if(around[4] == null){
-						around[7].setPosion( px + 1 + cw, py + ownLength + with);
+						around[7].setPosion( px + 1 + cw, py + ownLength + with, aroundTime[7], h + 1, newParent);
 					}else{
-						around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength + with);
+						around[7].setPosion(px + 1  + cw, py + around[4].getBottomHalf() + ownLength + with, aroundTime[7], h + 1, newParent);
 					}
 					
 					if(aroundArray[7] != null){
@@ -646,6 +713,11 @@ public class ObjectInfo {
 		}		
 	}
 
+	void setAnotherPosion(int x, int y){
+		px = x;
+		py = y;
+	}
+	
 	public int getLength() {
 		return length;
 	}
@@ -719,7 +791,7 @@ public class ObjectInfo {
 		return py;
 	}
 	
-	public ObjectReference getobject(){
+	public ObjectReference getObject(){
 		return object;
 	}
 
@@ -745,7 +817,8 @@ public class ObjectInfo {
 
 	}*/
 	
-	public void Linked(){
+	public void Linked(ObjectInfo from){
+		this.lastLinked = from;
 		this.linked = true;
 	}
 	
@@ -797,13 +870,14 @@ public class ObjectInfo {
 	public void reset(){
 		set = false;
 		calculated = false;
+		/*
 		linked = false;
-		link = false;
+		link = false;*/
 		
-		for(int i = 0; i < 8; i++){
+		/*for(int i = 0; i < 8; i++){
 			around[i] = null;
 			aroundArray[i] = null;
-		}
+		}*/
 		
 		
 		for(int i = 0; i < around_size.length; i++){
@@ -827,4 +901,20 @@ public class ObjectInfo {
 	}
 
 	
+
+	public int getTime(){
+		return time;
+	}
+	
+	public void setTime(int time){
+		this.time = time;
+	}
+	
+	public ClassDefinition getDef(){
+		return def;
+	}
+	
+	public HashMap<String, ObjectInfo> getAnother(){
+		return another;
+	}
 }

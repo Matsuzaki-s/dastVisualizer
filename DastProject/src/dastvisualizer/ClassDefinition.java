@@ -18,7 +18,6 @@ public class ClassDefinition {
 	}
 	
 	public void setField(String fieldName, String dir){
-		//ystem.out.println(fieldName+" " + dir);
 		fieldDirection.put(fieldName, numDirection(dir));
 		
 		numField++;
@@ -62,9 +61,10 @@ public class ClassDefinition {
 			break;
 		case ">v":
 			direction = 7;
-		/*case "Array":
+			break;
+		case "*":
 			direction = 8;
-		*/
+		
 			break;
 			default:
 				System.out.println("Error in ClassDifinition.numDirection");

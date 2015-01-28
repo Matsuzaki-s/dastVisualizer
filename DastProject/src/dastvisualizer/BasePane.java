@@ -66,8 +66,8 @@ public class BasePane extends JLayeredPane implements ActionListener{
 
 		for(Iterator<ObjectInfo> it = tar.iterator(); it.hasNext();){
 			ObjectInfo oin = (ObjectInfo)it.next();
-			//System.out.println(oin.object.toString());
-			//System.out.println(oin.isLinked() + " "+ oin.hasLink());
+			/*System.out.println(oin.object.type());
+			System.out.println(oin.isLinked() + " "+ oin.hasLink() + " " + oin.set);*/
 			if((oin.isLinked() == true || oin.hasLink() == true) && oin.set == true){
 				cellpanel.put(oin ,new CellPanel(oin));
 				if(cellpanel.get(oin).getPreferredSize().width > CellWidth && oin.isArray() == false){

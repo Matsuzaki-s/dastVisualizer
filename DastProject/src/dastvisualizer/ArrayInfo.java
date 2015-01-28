@@ -1,5 +1,6 @@
 package dastvisualizer;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,8 @@ public class ArrayInfo extends ObjectInfo{
 	private String fieldName;
 	private Type type;
 	
-	
+	private int[] changeTime;
+
 
 	private String name;
 	private int width = 0;
@@ -51,19 +53,6 @@ public class ArrayInfo extends ObjectInfo{
 		size = ((ArrayReference) tar).length();
 		this.fieldName = fieldName;
 		this.type = type;
-		/*try {
-			System.out.println(((ArrayType)type).isPrepared());
-			System.out.println(type);
-			if(((ArrayType)type).isPrepared()){
-				if((((ArrayType)type).componentType() instanceof PrimitiveType ) || ((((ArrayType)type).componentType().toString().matches(".*" + "java.lang.String" + ".*")))){
-					this.isPrimitive = true;
-				}
-			}
-		} catch (ClassNotLoadedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
 	}
 
 	ArrayInfo(ObjectInfo source){
@@ -79,7 +68,7 @@ public class ArrayInfo extends ObjectInfo{
 		this.py = source.getPy();
 	}
 
-	public void setLink(){
+	public void setLink(int time){
 		try {
 			boolean isRead = false;
 			for(int i = 0; i < size; i++){
@@ -110,22 +99,27 @@ public class ArrayInfo extends ObjectInfo{
 		}else{
 			if(arrayValue == null){
 				arrayValue = new ObjectInfo[size];
+				changeTime = new int[size];
 			}
 			for(int i = 0; i < size; i++){
-				arrayValue[i] = om.searchObjectInfo((ObjectReference)array.getValue(i));
+				ObjectInfo obin = om.searchObjectInfo((ObjectReference)array.getValue(i));
+				if(obin != null && arrayValue[i] != obin){
+					arrayValue[i] = obin;
+					changeTime[i] = time;
+				}
 				if(arrayValue[i] != null){
-					arrayValue[i].Linked();
+					arrayValue[i].Linked(this);
 					this.Link();
 				}else{
 					ObjectReference tar = (ObjectReference) array.getValue(i);
 					if(tar != null){
-					ClassDefinition cld = om.isDefinedClass(tar.referenceType());
-					if(cld != null){
-						om.getTargetObject().add(tar);
-						ObjectInfo object = new ObjectInfo(tar, (ReferenceType)tar.referenceType(), cld, om);
-						object.setField();
-						om.getObjectInfo().add(object);
-					}
+						ClassDefinition cld = om.isDefinedClass(tar.referenceType());
+						if(cld != null){
+							om.getTargetObject().add(tar);
+							ObjectInfo object = new ObjectInfo(tar, (ReferenceType)tar.referenceType(), cld, om);
+							object.setField();
+							om.getObjectInfo().add(object);
+						}
 					}
 				}
 				
@@ -150,6 +144,13 @@ public class ArrayInfo extends ObjectInfo{
 					if(arrayValue[i].getWidth() > width){
 						width = arrayValue[i].getWidth();
 					}
+					arrayValue[i].setTime(arrayValue[i].getTime());
+				}else if(arrayValue[i] != null && arrayValue[i].getTime() < changeTime[i]){
+					length += arrayValue[i].getLength();
+					if(arrayValue[i].getWidth() > width){
+						width = arrayValue[i].getWidth();
+					}
+					arrayValue[i].setTime(arrayValue[i].getTime());
 				}else{
 					length ++;
 				}
@@ -168,6 +169,13 @@ public class ArrayInfo extends ObjectInfo{
 					if(arrayValue[i].getLength() > length){
 						length = arrayValue[i].getLength();
 					}
+					arrayValue[i].setTime(arrayValue[i].getTime());
+				}else if(arrayValue[i] != null && arrayValue[i].getTime() < changeTime[i]){
+					width += arrayValue[i].getWidth();
+					if(arrayValue[i].getLength() > length){
+						length = arrayValue[i].getLength();
+					}
+					arrayValue[i].setTime(arrayValue[i].getTime());
 				}else{
 					width++;
 				}
@@ -296,20 +304,24 @@ public class ArrayInfo extends ObjectInfo{
 		}
 	}
 	
-	void setPosion(){
-		setPosion(0,0);
-	}
 	
-	void setPosion(int ulx, int uly){
-		if(isPrimitive == true){
+	void setPosion(int ulx, int uly,int time, int h, ArrayList<ObjectInfo> parent){
+		if(isPrimitive == true ){
 			setPrimitivePosion(ulx, uly);
 			return;
 		}
-		if(set == true){
+		if(set == true && (this.time != time || this.h <= 1)){
 			return;
 		}
+		for(Iterator<ObjectInfo> it = parent.iterator(); it.hasNext();){
+			if(((ObjectInfo)it.next()).equals(this)){
+				return;
+			}
+		}
+		parent.add(this);
 		
 		set = true;
+		this.h = h;
 		
 		if(with >= 0){
 			if(0 <= with && with <= 2){
@@ -341,7 +353,7 @@ public class ArrayInfo extends ObjectInfo{
 			int nx = 0;
 			for(int i = 0; i < size; i++){
 				if(arrayValue[i] != null){
-					arrayValue[i].setPosion(ulx + nx, py - arrayValue[i].getLength());
+					arrayValue[i].setPosion(ulx + nx, py - arrayValue[i].getLength(),changeTime[i], h + 1, parent);
 					nx += arrayValue[i].getWidth();
 				}else{
 					//nx++;
@@ -352,7 +364,7 @@ public class ArrayInfo extends ObjectInfo{
 
 			for(int i = 0; i < size; i++){
 				if(arrayValue[i] != null){
-					arrayValue[i].setPosion(ulx  , uly + ny);
+					arrayValue[i].setPosion(ulx  , uly + ny, changeTime[i],h + 1, parent);
 					ny += arrayValue[i].getLength();
 				}else{
 					ny ++;
@@ -363,7 +375,7 @@ public class ArrayInfo extends ObjectInfo{
 			int ny = 0;
 			for(int i = 0; i < size; i++){
 				if(arrayValue[i] != null){
-					arrayValue[i].setPosion(px + 1, uly + ny);
+					arrayValue[i].setPosion(px + 1, uly + ny, changeTime[i], h+1, parent);
 					ny += arrayValue[i].getLength();
 				}else{
 					ny ++;
@@ -374,7 +386,7 @@ public class ArrayInfo extends ObjectInfo{
 			int nx = 0;
 			for(int i = 0; i < size; i++){
 				if(arrayValue[i] != null){
-					arrayValue[i].setPosion(ulx + nx, py + ownLength);
+					arrayValue[i].setPosion(ulx + nx, py + ownLength, changeTime[i], h+ 1, parent);
 					nx += arrayValue[i].getWidth();
 				}else{
 					//nx++;
@@ -410,10 +422,10 @@ public class ArrayInfo extends ObjectInfo{
 		py = uly + getUpHalf();
 		}
 		
-		System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
+		/*System.out.println(type.toString() + index + ":(" + px + "," + py + ") ");
 		System.out.println("l:" + getLeftHalf() + " r:"+ getRightHalf() + " u:" + getUpHalf() + " d:" + getBottomHalf());
 		System.out.println("ulx:" + ulx + " uly:" + uly);
-		System.out.println("width:" + getWidth() + " length:" + getLength());
+		System.out.println("width:" + getWidth() + " length:" + getLength());*/
 	}
 	boolean checkObject(Object obj){
 		return checkArray(obj);
@@ -534,7 +546,7 @@ public class ArrayInfo extends ObjectInfo{
 				}else if(arrayValue[i] != null && array.getValue(i) == null){
 					return true;
 				}else if(arrayValue[i] != null && array.getValue(i) != null){
-					if(!(arrayValue[i].getobject().equals(array.getValue(i)))){
+					if(!(arrayValue[i].getObject().equals(array.getValue(i)))){
 						return true;
 					}
 				}
