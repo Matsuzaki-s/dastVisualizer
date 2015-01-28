@@ -24,8 +24,8 @@ public class BasePane extends JLayeredPane implements ActionListener{
 	 * 
 	 */
 	private static final long serialVersionUID = -2426900381722536632L;
-	private int CellWidth = 0;
-	private int CellLength = 0;
+	private int cellWidth = 0;
+	private int cellLength = 0;
 	private static final int LineLength = 17;	
 	private int bsWidth = 0;
 	private int bsLength = 0;
@@ -70,11 +70,11 @@ public class BasePane extends JLayeredPane implements ActionListener{
 			System.out.println(oin.isLinked() + " "+ oin.hasLink() + " " + oin.set);*/
 			if((oin.isLinked() == true || oin.hasLink() == true) && oin.set == true){
 				cellpanel.put(oin ,new CellPanel(oin));
-				if(cellpanel.get(oin).getPreferredSize().width > CellWidth && oin.isArray() == false){
-					CellWidth = cellpanel.get(oin).getPreferredSize().width;
+				if(cellpanel.get(oin).getPreferredSize().width > cellWidth && oin.isArray() == false){
+					cellWidth = cellpanel.get(oin).getPreferredSize().width;
 				}
-				if(cellpanel.get(oin).getPreferredSize().height > CellLength && oin.isArray() == false){
-					CellLength = cellpanel.get(oin).getPreferredSize().height;
+				if(cellpanel.get(oin).getPreferredSize().height > cellLength && oin.isArray() == false){
+					cellLength = cellpanel.get(oin).getPreferredSize().height;
 
 				}
 			}
@@ -86,10 +86,10 @@ public class BasePane extends JLayeredPane implements ActionListener{
 			CellPanel panel = entry.getValue();
 			try{
 			if(panel != null ){
-				if(panel.getCellLength() > CellLength /2){
-					panel.setBounds(object.getPx() * (CellWidth+ 20) + 25  , object.getPy() * (CellLength+ 40) + 20, panel.getMaximumSize().width,panel.getMaximumSize().height );
+				if(panel.getCellLength() > cellLength /2){
+					panel.setBounds(object.getPx() * (cellWidth+ 40) + 25  , object.getPy() * (cellLength+ 40) + 20, panel.getMaximumSize().width,panel.getMaximumSize().height );
 				}else{
-					panel.setBounds(object.getPx() * (CellWidth+ 20) + 25  , object.getPy() * (CellLength+ 40) +(CellLength /2) - panel.getCellLength()/2, panel.getMaximumSize().width,panel.getMaximumSize().height );
+					panel.setBounds(object.getPx() * (cellWidth+ 40) + 25  , object.getPy() * (cellLength+ 40) +(cellLength /2) - panel.getCellLength()/2, panel.getMaximumSize().width,panel.getMaximumSize().height );
 				}
 				add(panel, JLayeredPane.DEFAULT_LAYER);
 			}
@@ -100,7 +100,7 @@ public class BasePane extends JLayeredPane implements ActionListener{
 	}
 	
 	private void setLinePanel(){
-		LinePanel line = new LinePanel(targetObject, cellpanel);
+		LinePanel line = new LinePanel(targetObject, cellpanel, this);
 		this.add(line, JLayeredPane.PALETTE_LAYER);
 		line.setSize(this.getPreferredSize());
 	}
@@ -171,5 +171,12 @@ public class BasePane extends JLayeredPane implements ActionListener{
 		return cellpanel;
 	}
 
+	public int getMaxCellWidth(){
+		return cellWidth;
+	}
+	
+	public int getMaxCellLenght(){
+		return cellLength;
+	}
 	
 }

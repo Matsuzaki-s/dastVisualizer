@@ -371,4 +371,10 @@ public class ObjectManager {
 			}
 		}
 	}
+
+
+	public void setLink() {
+
+		
+	}
 }
