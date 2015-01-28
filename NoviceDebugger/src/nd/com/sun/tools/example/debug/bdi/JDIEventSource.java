@@ -52,6 +52,7 @@ import nd.com.sun.tools.example.debug.event.VMDeathEventSet;
 import nd.com.sun.tools.example.debug.event.VMDisconnectEventSet;
 import nd.com.sun.tools.example.debug.event.VMStartEventSet;
 
+import com.sun.jdi.ClassNotLoadedException;
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Field;
 import com.sun.jdi.ThreadReference;
@@ -63,6 +64,7 @@ import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 
+import dastvisualizer.ObjectInfo;
 import dastvisualizer.ObjectManager;
 import dastvisualizer.ReadDAST;
 
@@ -208,10 +210,16 @@ class JDIEventSource extends Thread {
 		}
 
 		public void modificationWatchpoint(ModificationWatchpointEventSet e)  {
-			objm.updateArray();
 			objm.renew(e.getObject(), e.getField(), e.getValueToBe());
-	    	objm.setLink();
+			//System.out.println(e.getObject() + " " + e.getField() + " " + e.getValueToBe());
+			/*try {
+				objm.check();
+			} catch (ClassNotLoadedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}*/
 	    	objm.draw();
+	    	List<ObjectInfo> obj = objm.getObjectInfo();
 			session.runtime.validateThreadInfo();
 			wantInterrupt = true;
 		}
