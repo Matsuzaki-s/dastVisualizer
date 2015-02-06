@@ -108,8 +108,8 @@ public class ArrayInfo extends ObjectInfo{
 					changeTime[i] = time;
 				}
 				if(arrayValue[i] != null){
-					arrayValue[i].Linked(this);
-					this.Link();
+					arrayValue[i].linked(this);
+					this.link();
 				}else{
 					ObjectReference tar = (ObjectReference) array.getValue(i);
 					if(tar != null){
@@ -128,6 +128,7 @@ public class ArrayInfo extends ObjectInfo{
 	}
 	
 	public void calculateSize(){
+	
 		if(isPrimitive == true){
 			calculatePrimitive();
 			return;

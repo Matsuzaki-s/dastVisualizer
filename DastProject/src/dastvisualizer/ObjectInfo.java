@@ -79,7 +79,9 @@ public class ObjectInfo {
 	private int bottom_half = 0;
 	private int left_half= 0;
 	private int right_half = 0;
+	protected int group = 0;
 
+	
 	protected int px;
 	protected int py;
 	
@@ -240,12 +242,12 @@ public class ObjectInfo {
 					}
 				}
 				if(direction <= 7 && around[direction] != null){
-					around[direction].Linked(this);
-					this.Link();
+					around[direction].linked(this);
+					this.link();
 				}
 				if(direction <= 7 && getAroundArray()[direction] != null){
-					getAroundArray()[direction].Linked(this);
-					this.Link();
+					getAroundArray()[direction].linked(this);
+					this.link();
 				}
 			}else if(direction != null && direction <= 7 && object.getValue(field) == null){
 				around[direction] = null;
@@ -300,10 +302,6 @@ public class ObjectInfo {
 			}
 		//}
 	}*/
-		
-	
-	
-	
 	boolean checkObject(Object obj){
 		if(obj == object){
 			return true;
@@ -315,11 +313,13 @@ public class ObjectInfo {
 		return tar.equals(object);
 	}	
 	
+
 	public int calculateSize(int totalHeight){
 		calculateSize();
 		headPoint = totalHeight;
 		return this.length;
 	}
+	
 	public void calculateSize(){
 
 		calculated = true;
@@ -817,12 +817,14 @@ public class ObjectInfo {
 
 	}*/
 	
-	public void Linked(ObjectInfo from){
-		this.lastLinked = from;
-		this.linked = true;
+	public void linked(ObjectInfo from){
+		if(from != this){
+			this.lastLinked = from;
+				this.linked = true;
+		};
 	}
 	
-	public void Link() {
+	public void link() {
 		this.link = true;
 	}
 	

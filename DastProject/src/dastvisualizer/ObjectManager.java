@@ -194,7 +194,7 @@ public class ObjectManager {
 		if(obInfo != null){
 			if(type != null && type instanceof ArrayType){
 				addArray(tar, field, (ObjectReference)value);
-				obInfo.Link();
+				obInfo.link();
 			}
 			try {
 				obInfo.setLink(time, event.field());
@@ -272,7 +272,7 @@ public class ObjectManager {
 				
 				if(type != null && type instanceof ArrayType){
 					addArray(object, field, (ObjectReference)value);
-					obj.Link();
+					obj.link();
 				}
 				try {
 					obj.setLink(time, field);
@@ -346,7 +346,7 @@ public class ObjectManager {
 				}
 				if(tar.type() != null && tar.type() instanceof ArrayType){
 					addArray(tar, field, objr);
-					object.Link();
+					object.link();
 				}
 			}
 			
