@@ -118,11 +118,19 @@ public class Connect {
 	//ˆÈ‰ºƒRƒsƒy
 	 void generateTrace() {
 		 try {
-			rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\Desktop\\prog\\BST\\BST.dust"));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				//rf = new ReadDAST(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
+				//rf = new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dast"));
+				//rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\git\\DENOwithDastVisualizer\\RonproEditor\\testbase\\MyProjects\\BTree\\DASTFile"));
+				 rf = new ReadDAST(new FileInputStream("DASTFile"));
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				try {
+					rf = new ReadDAST(new FileInputStream("DASTFile.txt"));
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		 PrintWriter writer = new PrintWriter(System.out);
 	        VM.setDebugTraceMode(debugTraceMode);
 	        EventThread eventThread = new EventThread(VM, excludes, writer, rf); 

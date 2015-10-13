@@ -97,6 +97,11 @@ public class EventThread extends Thread {
 				EventIterator it = eventSet.eventIterator();
 				while (it.hasNext()) {
 					handleEvent(it.nextEvent());
+					if(objm != null){
+						if(objm.checkArray()){
+							objm.draw();
+						}
+					}
 				}
 				eventSet.resume();
 				// step(eventSet);
@@ -395,9 +400,8 @@ public class EventThread extends Thread {
 			}		
 		}*/
 		
-		objm.renew(event);
-		objm.setLink();
-		objm.draw();
+		objm.renew(event.object(), event.field(), event.valueToBe());
+    	objm.draw();
 		threadTrace(event.thread()).fieldWatchEvent(event);
 	}
 

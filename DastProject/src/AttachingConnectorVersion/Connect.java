@@ -67,7 +67,7 @@ public class Connect {
 	     			vm = ac.attach(arg);
 	     			} catch (IOException | IllegalConnectorArgumentsException e) {
 				// TODO Auto-generated catch block
-	     				e.printStackTrace();
+	     				
 	     				}
 	     		if(vm != null){
 	     			attached = true;
@@ -83,10 +83,15 @@ public class Connect {
 			//rf = new ReadDAST(new FileInputStream("TestTarget\\HashC\\Chain.dast"));
 			//rf = new ReadDAST(new FileInputStream("TestTarget\\BST\\BST.dast"));
 			//rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\git\\DENOwithDastVisualizer\\RonproEditor\\testbase\\MyProjects\\BTree\\DASTFile"));
-			 rf = new ReadDAST(new FileInputStream("C:\\Users\\student\\Desktop\\Œ¤‹†Žº\\B4ƒ[ƒ~\\‘²‹ÆŒ¤‹†\\SA\\TestTarget\\src\\ArrayTest\\DASTFile"));
+			 rf = new ReadDAST(new FileInputStream("DASTFile"));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			try {
+				rf = new ReadDAST(new FileInputStream("DASTFile.txt"));
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		 PrintWriter writer = new PrintWriter(System.out);
 	        vm.setDebugTraceMode(debugTraceMode);
