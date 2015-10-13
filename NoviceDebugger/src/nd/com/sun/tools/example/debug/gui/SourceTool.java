@@ -44,11 +44,11 @@ import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
-// import java.awt.event.ActionEvent;
-// import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-// import java.awt.event.MouseListener;
+import java.awt.event.MouseListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
@@ -56,9 +56,9 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JList;
-// import javax.swing.JMenuItem;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-// import javax.swing.JPopupMenu;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.ListModel;
@@ -69,7 +69,7 @@ import nd.com.sun.tools.example.debug.bdi.LineBreakpointSpec;
 import nd.com.sun.tools.example.debug.bdi.SpecErrorEvent;
 import nd.com.sun.tools.example.debug.bdi.SpecEvent;
 import nd.com.sun.tools.example.debug.bdi.SpecListener;
-// import nd.novicedebugger.NDebuggerManager;
+import nd.novicedebugger.NDebuggerManager;
 import clib.view.textpane.CJavaCodeDocument;
 import clib.view.textpane.CTextPaneUtils;
 
@@ -104,7 +104,7 @@ public class SourceTool extends JPanel {
 	private String sourceName; // relative path name, if showSourceFile
 	private Location sourceLocn; // location, if showSourceForLocation
 
-	// private CommandInterpreter interpreter;
+	private CommandInterpreter interpreter;
 
 	public JList getList(){
 		return list;
@@ -119,7 +119,7 @@ public class SourceTool extends JPanel {
 		runtime = this.env.getExecutionManager();
 		sourceManager = this.env.getSourceManager();
 		this.context = this.env.getContextManager();
-		// this.interpreter = new CommandInterpreter(env, true);
+		this.interpreter = new CommandInterpreter(env, true);
 
 		sourceModel = new DefaultListModel(); // empty
 
@@ -133,15 +133,15 @@ public class SourceTool extends JPanel {
 		runtime.addSpecListener(listener);
 		sourceManager.addSourceListener(listener);
 
-		// MouseListener squeek = new STMouseListener();
-		// list.addMouseListener(squeek);
+		MouseListener squeek = new STMouseListener();
+		list.addMouseListener(squeek);
 
 		this.lineNumberView = new LineNumberView(this);
 		JScrollPane scroll = new JScrollPane(list);
 		scroll.setRowHeaderView(lineNumberView);
 		add(scroll);
 		
-		// add(new JScrollPane());
+		//add(new JScrollPane());
 	}
 
 	public void setTextFont(Font f) {
@@ -350,10 +350,10 @@ public class SourceTool extends JPanel {
 			String text = line.text;
 			try {
 				MyJTextPane pane = new MyJTextPane(new CJavaCodeDocument());
-				// pane.setLineNumber(index + 1);
+				pane.setLineNumber(index + 1);
 				boolean isExecution = env.linenum == index + 1;
-				// boolean hasBreakpoint = line.hasBreakpoint;
-				boolean hasBreakpoint = false;
+				boolean hasBreakpoint = line.hasBreakpoint;
+				//boolean hasBreakpoint = false;
 				pane.setExecution(isExecution);
 				if(isExecution && env.getAPMode() == env.LINEMODE){
 					pane.setForeground(list.getSelectionForeground());
@@ -416,7 +416,7 @@ public class SourceTool extends JPanel {
 		}
 
 		protected class MyJTextPane extends JTextPane {
-			// int lineNumber;
+			int lineNumber;
 			boolean isExecution, hasBreakpoint;
 			/**
 			 * 
@@ -433,10 +433,10 @@ public class SourceTool extends JPanel {
 				int green = !(hasBreakpoint || isExecution) ? 255 : 0;
 				int blue = isExecution || !(hasBreakpoint || isExecution) ? 255 : 0;
 				g.setColor(new Color(red, green, blue));
-//				if (env.getAPMode() == env.LINEMODE) {
-//					g.drawRect(0, 0,
-//							env.getSourceTool().getPreferredSize().width, getPreferredSize().height - 1);
-//				}
+				if (env.getAPMode() == env.LINEMODE) {
+				g.drawRect(0, 0,
+							env.getSourceTool().getPreferredSize().width, getPreferredSize().height - 1);
+				}
 				if (env.getAPMode() == env.BETWEENMODE) {
 					g.drawLine(0, 0,
 							env.getSourceTool().getPreferredSize().width, 0);
@@ -452,11 +452,15 @@ public class SourceTool extends JPanel {
 				this.hasBreakpoint = b;
 			}
 			
+			public void setLineNumber(int i){
+				this.lineNumber = i;
+			}
+			
 		}
 
 	}
 
-	/*
+	
 	private class STMouseListener extends MouseAdapter implements MouseListener {
 		public void mousePressed(MouseEvent e) {
 			if (e.isPopupTrigger()) {
@@ -511,7 +515,7 @@ public class SourceTool extends JPanel {
 			return item;
 		}
 	}
-	*/
+	
 	
 	public class LineNumberView extends JComponent {
 
@@ -526,8 +530,8 @@ public class SourceTool extends JPanel {
 		private int topInset;
 		private int fontAscent;
 		private int fontHeight;
-		// private int fontDescent;
-		// private int fontLeading;
+		private int fontDescent;
+		private int fontLeading;
 
 		public LineNumberView(SourceTool srcTool) {
 			this.srcTool = srcTool;

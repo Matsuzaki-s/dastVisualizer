@@ -84,8 +84,6 @@ public class CommandInterpreter {
 	private OutputSink out; //### Hack!  Should be local in each method used.
 	private String lastCommand = "help";
 
-	//追加
-	private ObjectManager objm;
 	
 	public CommandInterpreter(Environment env) {
 		this(env, true);
@@ -98,7 +96,6 @@ public class CommandInterpreter {
 		this.context = env.getContextManager();
 		this.classManager = env.getClassManager();
 		this.sourceManager = env.getSourceManager();
-		this.objm = new ObjectManager(env.getReadFile().getClassDefinition());
 	}
 
 	private ThreadReference[] threads = null;
@@ -399,7 +396,7 @@ public class CommandInterpreter {
 
 		// メインメソッド(turtleの場合start(), それ以外の場合run())の先頭でストップ
 		executeCommand("view " + context.getMainClassName() + ".java");
-		String methodname = "run";
+		String methodname = "main";
 		if(env.isTurtle()){
 			methodname = "start";
 		}
@@ -418,8 +415,7 @@ public class CommandInterpreter {
 					runtime.run(suspended,
 							vmArgs,
 							clname,
-							context.getProgramArguments(),
-							objm);
+							context.getProgramArguments());
 					return true;
 				} catch (VMLaunchFailureException e) {
 					env.failure("Attempt to launch main class \"" + clname + "\" failed.");
@@ -441,7 +437,7 @@ public class CommandInterpreter {
 			String args = sbuf.toString();
 			try {
 				String vmArgs = context.getVmArguments();
-				runtime.run(suspended, vmArgs, clname, args, objm);
+				runtime.run(suspended, vmArgs, clname, args);
 				context.setMainClassName(clname);
 				//context.setVmArguments(vmArgs);
 				context.setProgramArguments(args);
@@ -457,7 +453,7 @@ public class CommandInterpreter {
 
 	private void commandConnect(StringTokenizer t) {
 		try {
-			LaunchTool.queryAndLaunchVM(runtime, objm);
+			LaunchTool.queryAndLaunchVM(runtime);
 		} catch (VMLaunchFailureException e) {
 			env.failure("Attempt to connect failed.");
 		}
@@ -471,7 +467,7 @@ public class CommandInterpreter {
 			portName = context.getRemotePort();
 			if (!portName.equals("")) {
 				try {
-					runtime.attach(portName, objm);
+					runtime.attach(portName);
 				} catch (VMLaunchFailureException e) {
 					env.failure("Attempt to attach to port \"" + portName + "\" failed.");
 				}
@@ -481,7 +477,7 @@ public class CommandInterpreter {
 		} else {
 			portName = t.nextToken();
 			try {
-				runtime.attach(portName, objm);
+				runtime.attach(portName);
 			} catch (VMLaunchFailureException e) {
 				env.failure("Attempt to attach to port \"" + portName + "\" failed.");
 			}

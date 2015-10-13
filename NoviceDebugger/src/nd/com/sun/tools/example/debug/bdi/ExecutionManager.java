@@ -352,7 +352,7 @@ public class ExecutionManager {
 	 */
 
 	public void run(boolean suspended, String vmArgs, String className,
-			String args, ObjectManager objm) throws VMLaunchFailureException {
+			String args) throws VMLaunchFailureException {
 
 		endSession();
 
@@ -368,13 +368,13 @@ public class ExecutionManager {
 		String cmdLine = className + " " + args;
 
 		startSession(new ChildSession(this, vmArgs, cmdLine, appInput,
-				appOutput, appError, diagnostics, objm));
+				appOutput, appError, diagnostics));
 	}
 
 	/*
 	 * Attach to an existing VM.
 	 */
-	public void attach(String portName, ObjectManager objm) throws VMLaunchFailureException {
+	public void attach(String portName) throws VMLaunchFailureException {
 		endSession();
 
 		// ### Changes made here for connectors have broken the
@@ -392,16 +392,16 @@ public class ExecutionManager {
 		Map<String, ?> arguments = connector.defaultArguments();
 		((Connector.Argument) arguments.get("port")).setValue(portName);
 
-		Session newSession = internalAttach(connector, arguments, objm);
+		Session newSession = internalAttach(connector, arguments);
 		if (newSession != null) {
 			startSession(newSession);
 		}
 	}
 
-	private Session internalAttach(AttachingConnector connector, Map arguments, ObjectManager objm) {
+	private Session internalAttach(AttachingConnector connector, Map arguments) {
 		try {
 			VirtualMachine vm = connector.attach(arguments);
-			return new Session(vm, this, diagnostics, objm);
+			return new Session(vm, this, diagnostics);
 		} catch (IOException ioe) {
 			diagnostics.putString("\n Unable to attach to target VM: "
 					+ ioe.getMessage());
@@ -411,11 +411,25 @@ public class ExecutionManager {
 		}
 		return null;
 	}
+	
+	/*public Session internalAttach(AttachingConnector connector, Map arguments) {
+		try {
+			VirtualMachine vm = connector.attach(arguments);
+			return new Session(vm, this, diagnostics);
+		} catch (IOException ioe) {
+			diagnostics.putString("\n Unable to attach to target VM: "
+					+ ioe.getMessage());
+		} catch (IllegalConnectorArgumentsException icae) {
+			diagnostics.putString("\n Invalid connector arguments: "
+					+ icae.getMessage());
+		}
+		return null;
+	}*/
 
-	private Session internalListen(ListeningConnector connector, Map arguments, ObjectManager objm) {
+	private Session internalListen(ListeningConnector connector, Map arguments) {
 		try {
 			VirtualMachine vm = connector.accept(arguments);
-			return new Session(vm, this, diagnostics, objm);
+			return new Session(vm, this, diagnostics);
 		} catch (IOException ioe) {
 			diagnostics
 					.putString("\n Unable to accept connection to target VM: "
@@ -432,7 +446,7 @@ public class ExecutionManager {
 	 * 
 	 * @return true on success
 	 */
-	public boolean explictStart(Connector connector, Map<String, ?> arguments, ObjectManager objm)
+	public boolean explictStart(Connector connector, Map<String, ?> arguments)
 			throws VMLaunchFailureException {
 		Session newSession = null;
 
@@ -441,13 +455,13 @@ public class ExecutionManager {
 		if (connector instanceof LaunchingConnector) {
 			// we were launched, use ChildSession
 			newSession = new ChildSession(this, (LaunchingConnector) connector,
-					arguments, appInput, appOutput, appError, diagnostics, objm);
+					arguments, appInput, appOutput, appError, diagnostics);
 		} else if (connector instanceof AttachingConnector) {
 			newSession = internalAttach((AttachingConnector) connector,
-					arguments, objm);
+					arguments);
 		} else if (connector instanceof ListeningConnector) {
 			newSession = internalListen((ListeningConnector) connector,
-					arguments, objm);
+					arguments);
 		} else {
 			diagnostics.putString("\n Unknown connector: " + connector);
 		}
@@ -465,7 +479,7 @@ public class ExecutionManager {
 		endSession();
 	}
 
-	private void startSession(Session s) throws VMLaunchFailureException {
+	public void startSession(Session s) throws VMLaunchFailureException {
 		if (!s.attach()) {
 			throw new VMLaunchFailureException();
 		}
@@ -847,5 +861,9 @@ public class ExecutionManager {
 
 	public List<EventRequestSpec> eventRequestSpecs() {
 		return specList.eventRequestSpecs();
+	}
+	
+	public void setObjectManager(ObjectManager objm){
+		session.setObjectManager(objm);
 	}
 }

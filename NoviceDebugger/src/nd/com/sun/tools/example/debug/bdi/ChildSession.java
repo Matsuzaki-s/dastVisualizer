@@ -73,22 +73,22 @@ class ChildSession extends Session {
 
 	public ChildSession(ExecutionManager runtime, String userVMArgs,
 			String cmdLine, InputListener input, OutputListener output,
-			OutputListener error, OutputListener diagnostics, ObjectManager objm) {
+			OutputListener error, OutputListener diagnostics) {
 		this(runtime, getVM(diagnostics, userVMArgs, cmdLine), input, output,
-				error, diagnostics, objm);
+				error, diagnostics);
 	}
 
 	public ChildSession(ExecutionManager runtime, LaunchingConnector connector,
 			Map arguments, InputListener input, OutputListener output,
-			OutputListener error, OutputListener diagnostics, ObjectManager objm) {
+			OutputListener error, OutputListener diagnostics) {
 		this(runtime, generalGetVM(diagnostics, connector, arguments), input,
-				output, error, diagnostics, objm);
+				output, error, diagnostics);
 	}
 
 	private ChildSession(ExecutionManager runtime, VirtualMachine vm,
 			InputListener input, OutputListener output, OutputListener error,
-			OutputListener diagnostics, ObjectManager objm) {
-		super(vm, runtime, diagnostics, objm);
+			OutputListener diagnostics) {
+		super(vm, runtime, diagnostics);
 		this.input = input;
 		this.output = output;
 		this.error = error;

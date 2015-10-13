@@ -75,7 +75,6 @@ class LaunchTool {
 
     private final ExecutionManager runtime;
     
-    private final ObjectManager objm;
 
     private abstract class ArgRep {
         final Connector.Argument arg;
@@ -144,9 +143,8 @@ class LaunchTool {
     }
         
 
-    private LaunchTool(ExecutionManager runtime, ObjectManager objm) {
+    private LaunchTool(ExecutionManager runtime) {
         this.runtime = runtime;
-        this.objm = objm;
     }
 
     private Connector selectConnector() {
@@ -248,7 +246,7 @@ class LaunchTool {
                     ar.install();
                 }
                 try {
-                    if (runtime.explictStart(connector, args, objm)) {
+                    if (runtime.explictStart(connector, args)) {
                         dialog.setVisible(false);
                         dialog.dispose();
                     } else {
@@ -284,9 +282,9 @@ class LaunchTool {
         return buttonPanel;
     }
 
-    static void queryAndLaunchVM(ExecutionManager runtime, ObjectManager objm)
+    static void queryAndLaunchVM(ExecutionManager runtime)
                                          throws VMLaunchFailureException {
-        LaunchTool lt = new LaunchTool(runtime, objm);
+        LaunchTool lt = new LaunchTool(runtime);
         Connector connector = lt.selectConnector();
         if (connector != null) {
             lt.configureAndConnect(connector);

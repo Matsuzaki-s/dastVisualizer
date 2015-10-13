@@ -59,14 +59,11 @@ import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VMDisconnectedException;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
-import com.sun.jdi.event.ModificationWatchpointEvent;
 import com.sun.jdi.request.EventRequest;
 import com.sun.jdi.request.EventRequestManager;
 import com.sun.jdi.request.ModificationWatchpointRequest;
 
-import dastvisualizer.ObjectInfo;
 import dastvisualizer.ObjectManager;
-import dastvisualizer.ReadDAST;
 
 /**
  */
@@ -79,7 +76,7 @@ class JDIEventSource extends Thread {
 	private boolean wantInterrupt;  //### Hack
 
 	/*í«â¡ïîï™*/
-	private final ObjectManager objm;
+	private ObjectManager objm;
 	private String[] excludes = {"java.*", "javax.*", "sun.*", 
 	 "com.sun.*"};
 	
@@ -110,7 +107,6 @@ class JDIEventSource extends Thread {
 		do {
 			EventSet jdiEventSet = queue.remove();
 			es = AbstractEventSet.toSpecificEventSet(jdiEventSet);
-			//objm.updateArray();
 			session.interrupted = es.suspendedAll();
 			dispatchEventSet(es);
 			
@@ -119,7 +115,6 @@ class JDIEventSource extends Thread {
 
 	//### Gross foul hackery!
 	private void dispatchEventSet(final AbstractEventSet es) {
-		//System.out.println(es);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				boolean interrupted = es.suspendedAll();
@@ -140,6 +135,12 @@ class JDIEventSource extends Thread {
 				if (es instanceof ThreadDeathEventSet) {
 					ThreadReference t = ((ThreadDeathEventSet)es).getThread();
 					session.runtime.removeThreadInfo(t);
+				}
+				
+				if(objm != null){
+					if(objm.checkArray()){
+						objm.draw();
+					}
 				}
 			}
 		});
@@ -171,10 +172,10 @@ class JDIEventSource extends Thread {
 		}
 
 		public void classPrepare(ClassPrepareEventSet e)  {
-			System.out.println(CPcount +  " "  + e.getReferenceType().name());
-			CPcount++;
+			/*System.out.println(CPcount +  " "  + e.getReferenceType().name());
+			CPcount++;*/
 			//í«â¡
-			if(objm.classPrepare(e.getReferenceType())){
+			if(objm != null && objm.classPrepare(e.getReferenceType())){
 			EventRequestManager mgr = session.vm.eventRequestManager();
 			List fields = e.getReferenceType().visibleFields(); // visibeFields() Å® allFields()
 			for (Iterator it = fields.iterator(); it.hasNext();) {
@@ -210,16 +211,10 @@ class JDIEventSource extends Thread {
 		}
 
 		public void modificationWatchpoint(ModificationWatchpointEventSet e)  {
+			if(objm != null){
 			objm.renew(e.getObject(), e.getField(), e.getValueToBe());
-			//System.out.println(e.getObject() + " " + e.getField() + " " + e.getValueToBe());
-			/*try {
-				objm.check();
-			} catch (ClassNotLoadedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}*/
 	    	objm.draw();
-	    	List<ObjectInfo> obj = objm.getObjectInfo();
+			}
 			session.runtime.validateThreadInfo();
 			wantInterrupt = true;
 		}
@@ -248,5 +243,9 @@ class JDIEventSource extends Thread {
 			//### Do we need to do anything with it?
 			wantInterrupt = false;
 		}
+	}
+	
+	public void setObjectManager(ObjectManager objm){
+		this.objm = objm;
 	}
 }

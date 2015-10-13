@@ -104,7 +104,7 @@ public class GUI extends JPanel {
 	private JSplitPane views;
 	
 	// 実行環境
-	private final Environment env = new Environment();
+	private final Environment env;
 	
 	// ブロックビューとソースビューの切り替え表示用
 	// private JPanel executiionView;
@@ -119,15 +119,21 @@ public class GUI extends JPanel {
 	// private StackTraceTool stackTool;
 	// private MonitorTool monitorTool;
 
+	private boolean jiveMode = false;
 
-	public GUI(){
-		
-	}
 	
-	public GUI(FileInputStream pass) {
-		
-		env.setReadFile(new ReadDAST(pass));
-		
+	public GUI() {
+		env = new Environment();
+		guiCreate();
+	} 
+	
+	public GUI(boolean mode){
+		this.jiveMode = mode;
+		env = new Environment();
+		guiCreate();
+	}
+
+	private void guiCreate(){
 		setLayout(new BorderLayout());
 		setBorder(new EmptyBorder(5, 5, 5, 5));
 
@@ -209,9 +215,7 @@ public class GUI extends JPanel {
 		main.setResizeWeight(0.7d);
 		
 		add(main, BorderLayout.CENTER);
-
 	}
-
 	// 使用方法
 	private static void usage() {
 		String separator = File.pathSeparator;
@@ -403,6 +407,19 @@ public class GUI extends JPanel {
 				menu.add(action);
 			}
 			
+			//追加
+			{
+				CAction action = CActionUtils.createAction("再開",
+						new ICTask() {
+							public void doTask(){
+								NDebuggerManager.firePlayPressed();
+								new CommandInterpreter(env, true)
+								.executeCommand("resume");
+							}
+						});
+				menu.add(action);
+			}
+			
 //			{
 //				CAction action = CActionUtils.createAction("ビュー切り替え", 
 //						new ICTask() {
@@ -523,5 +540,17 @@ public class GUI extends JPanel {
 		frame.setSize((int)(frame.getWidth() * 0.6), (int)(frame.getHeight() * 0.8));
 		views.setDividerLocation(views.getLeftComponent().getMinimumSize().width);
 		views.repaint();
+	}
+
+	public void setDASTFile(FileInputStream fileInputStream) {
+		if(!jiveMode){
+			env.setDASTFile(new ReadDAST(fileInputStream));
+		}else{
+			env.setDASTFile(new ReadDAST(fileInputStream), jiveMode);
+		}
+	}
+	
+	public boolean getMode(){
+		return jiveMode;
 	}
 }

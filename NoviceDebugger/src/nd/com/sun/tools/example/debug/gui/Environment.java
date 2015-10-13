@@ -44,7 +44,8 @@ import nd.novicedebugger.NVariableTool;
 import com.sun.jdi.Location;
 
 import controller.WorkspaceController;
-
+import dastvisualizer.ObjectManager;
+import dastvisualizer.ObjectManagerVerJive;
 import dastvisualizer.ReadDAST;
 
 public class Environment {
@@ -62,6 +63,7 @@ public class Environment {
 	
 	//’Ç‰Á
 	private ReadDAST readfile;
+	public ObjectManager objm = null;
 	
 	// SrcTool
 	private SourceTool srcTool;
@@ -272,8 +274,19 @@ public class Environment {
 		return readfile;
 	}
 	
-	public void setReadFile(ReadDAST readfile){
-
+	public void setDASTFile(ReadDAST readfile){
 		this.readfile = readfile;
+		if(readfile != null){
+			this.objm = new ObjectManager(readfile.getClassDefinition());
+		}
+		runtime.setObjectManager(objm);
+	}
+	
+	public void setDASTFile(ReadDAST readfile, boolean mode){
+		this.readfile = readfile;
+		if(readfile != null){
+			this.objm = new ObjectManagerVerJive(readfile.getClassDefinition());
+		}
+		runtime.setObjectManager(objm);
 	}
 }

@@ -47,14 +47,14 @@ import dastvisualizer.ObjectManager;
  * Our repository of what we know about the state of one
  * running VM.
  */
-class Session {
+public class Session {
 
 	final VirtualMachine vm;    
 	final ExecutionManager runtime;
 	final OutputListener diagnostics;
 	
 	//’Ç‰Á///////////////
-	final ObjectManager objm;
+	ObjectManager objm;
 	/////////////
 	
 
@@ -64,16 +64,13 @@ class Session {
 	private JDIEventSource eventSourceThread = null;
 	private int traceFlags;
 	private boolean dead = false;
-
+	
 	public Session(VirtualMachine vm, ExecutionManager runtime,
-			OutputListener diagnostics, ObjectManager objm) {
+			OutputListener diagnostics) {
 		this.vm = vm;
 		this.runtime = runtime;
 		this.diagnostics = diagnostics;
 		this.traceFlags = VirtualMachine.TRACE_NONE;
-		//’Ç‰Á/////////////////
-		this.objm = objm;
-		//////////////////////
 	}
 
 	/**
@@ -116,5 +113,9 @@ class Session {
 			dead = true;
 			diagnostics.putString("Disconnected from VM");
 		}
+	}
+	public void setObjectManager(ObjectManager objm){
+		this.objm = objm;
+		eventSourceThread.setObjectManager(objm);
 	}
 }
